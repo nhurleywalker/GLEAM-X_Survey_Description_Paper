@@ -137,6 +137,9 @@ def create_astrometry(
     ref_ra='RAJ2000', 
     ref_dec='DEJ2000',
     plot_output=None,
+    min_snr=None,
+    flux_col=None,
+    flux_err_col=None,
     **kwargs
     ):
     logger.info(f"Loading {src_cata_path}")
@@ -144,6 +147,16 @@ def create_astrometry(
 
     logger.info(f"Loading reference catalogue {ref_cata_path}")
     ref_cata = Table.read(ref_cata_path).to_pandas()
+
+    if not None in (min_snr, flux_col, flux_err_col):
+        logger.info(f"Will filter sources based on SNR using: ")
+        logger.info(f"Minimum SNR: {min_snr}")
+        logger.info(f"Brightness column: {flux_col}")
+        logger.info(f"Brightness Uncertainity column: {flux_err_col}")
+
+        mask = (src_cata[flux_col] / src_cata[flux_err_col]) > min_snr
+        logger.info(f"{np.sum(mask)} of {len(src_cata)} selected")
+        src_cata = src_cata[mask]
 
     logger.info(f'Creating source sky positions using {src_ra} and {src_dec} ')
     src_pos = SkyCoord(
@@ -173,6 +186,10 @@ if __name__ == '__main__':
     parser.add_argument('--ref-ra', type=str, default='RAJ2000', help='The name of the RA column in the reference catalogue to use')
     parser.add_argument('--ref-dec', type=str, default='DEJ2000', help='The name of the DEC column in the reference catalogue to use')
 
+    parser.add_argument('--min-snr', default=None, type=float, help='The minimum SNR of sources in the source catalogue for them to be considered in the astrometry')
+    parser.add_argument('--flux-col', type=str, default=None, help='The column to use as the measured brightness')
+    parser.add_argument('--flux-err-col', type=str, default=None, help='The column to use as the error on the measured brightness')
+
     parser.add_argument('-p', '--plot-output', default=None, type=str, help='Path to use for the astrometry output plot')
 
     parser.add_argument('-v','--verbose', default=False, action='store_true', help='Extra output logging')
@@ -189,5 +206,8 @@ if __name__ == '__main__':
         src_dec=args.dec,
         ref_ra=args.ref_ra,
         ref_dec=args.ref_dec,
-        plot_output=args.plot_output
+        plot_output=args.plot_output,
+        min_snr=args.min_snr,
+        flux_col=args.flux_col,
+        flux_err_col=args.flux_err_col
     )
