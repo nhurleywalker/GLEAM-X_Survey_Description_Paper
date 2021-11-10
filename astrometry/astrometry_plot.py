@@ -16,9 +16,12 @@ from matplotlib.ticker import FuncFormatter
 
 plt.rcParams.update({
     "text.usetex": True,
-    "font.family": "sans-serif",
-    "font.sans-serif": ["Helvetica"]}
+    "font.family": "serif",
+    "font.size": 10}
 )
+#    "font.sans-serif": ["Helvetica"]}
+# Good for making a png for talks
+#    "font.size": 16,
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -118,8 +121,8 @@ def inspect_astrometry(gleam_sky, ref_sky, plot_output=None, info=None):
         ax_right.yaxis.set_visible(False)
         
         ax2.set(
-            xlabel='RA Offset (arcsecond)',
-            ylabel='Dec Offset (arcsecond)',
+            xlabel='$\Delta$RA (arcsecond)',
+            ylabel='$\Delta$Dec (arcsecond)',
         )
         
         fig.tight_layout()
@@ -137,6 +140,7 @@ def create_astrometry(
     ref_ra='RAJ2000', 
     ref_dec='DEJ2000',
     plot_output=None,
+    latex_output=None,
     min_snr=None,
     flux_col=None,
     flux_err_col=None,
@@ -175,6 +179,9 @@ def create_astrometry(
     for k, v in info.items():
         logger.debug(f"{k} {v}")
 
+    if latex_output is True:
+        print("RA astrometric offset (mas) & ${0:+3.1f}\pm{1:3.1f}$ \\\\".format(1000*info['ra_mean_delta'], info['ra_std_delta']))
+        print("Dec astrometric offset (mas) & ${0:+3.1f}\pm{1:3.1f}$ \\\\".format(1000*info['dec_mean_delta'], info['dec_std_delta']))
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Creates the astrometry plots for the GLEAM-X IDR1 paper')
@@ -193,6 +200,7 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--plot-output', default=None, type=str, help='Path to use for the astrometry output plot')
 
     parser.add_argument('-v','--verbose', default=False, action='store_true', help='Extra output logging')
+    parser.add_argument('-l','--latex', default=False, action='store_true', help='Print the astrometry info for the paper in LaTeX table rows')
 
     args = parser.parse_args()
 
@@ -207,6 +215,7 @@ if __name__ == '__main__':
         ref_ra=args.ref_ra,
         ref_dec=args.ref_dec,
         plot_output=args.plot_output,
+        latex_output=args.latex,
         min_snr=args.min_snr,
         flux_col=args.flux_col,
         flux_err_col=args.flux_err_col
