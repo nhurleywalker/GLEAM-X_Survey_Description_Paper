@@ -140,6 +140,10 @@ def make_plot(comp_path, coeffs_path, out_path=None, nsrcs=None):
         xlabel='Counts'
     )
 
+# Remove overlapping tick labels
+# No idea why this array has so many elements when I can only see five with my EYES
+    plt.setp(axt.get_yticklabels()[0], visible = False)
+    plt.setp(ax1.get_yticklabels()[-5:-1], visible = False)
     fig.tight_layout()
 
     if out_path is None:
