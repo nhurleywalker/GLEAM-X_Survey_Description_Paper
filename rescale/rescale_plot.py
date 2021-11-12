@@ -39,11 +39,36 @@ def density_scatter( x , y, ax = None, sort = True, bins = 20, **kwargs )   :
     
     return ax
 
+def weighted_plot(x, y, weight, ax, *args, **kwargs):
 
-def make_plot(comp_path, coeffs_path, out_path=None):
+    order = np.argsort(weight)
+    x = x[order]
+    y = y[order]
+    w = weight[order]
+
+    SNR = np.log10(w)
+
+    ax.scatter(
+        x,
+        y,
+        marker='.',
+        c=SNR,
+        cmap='Greys'
+    )
+
+    return ax
+
+
+def make_plot(comp_path, coeffs_path, out_path=None, nsrcs=None):
     df = Table.read(comp_path).to_pandas()
+    
+    if nsrcs is not None:
+        df['weight'] = df['flux'] / df['local_rms']
+        df = df.sort_values('weight', ascending=False)
+        df = df[:nsrcs]
+
     coeffs = np.loadtxt(coeffs_path)
-    poly = np.poly1d(coeffs)
+    poly_order = len(coeffs) - 1
 
     dec_min = np.min(df.Dec)
     dec_max = np.max(df.Dec)
@@ -54,34 +79,37 @@ def make_plot(comp_path, coeffs_path, out_path=None):
         100
     )
 
+    dec_corr = np.zeros_like(dec_range)
+    for i in range(0, poly_order + 1):
+        dec_corr += coeffs[i] * pow(dec_range, poly_order - i)
+
     fig, ax1 = plt.subplots(1,1,figsize=(4,4))
 
     divider = make_axes_locatable(ax1)
     axt = divider.append_axes('top', size='100%', pad=0)
     axr = divider.append_axes('right', size='25%', pad=0, sharey=ax1)
 
-    density_scatter(
-        df.Dec,
-        df.log10ratio,
+    weighted_plot(
+        df.Dec.values,
+        df.log10ratio.values,
+        (df.flux / df.local_rms).values,
         axt,
-        alpha=0.003,
         marker='.',
         edgecolor='None'
     )
     axt.plot(
         dec_range,
-        poly(dec_range),
-        color='black',
+        dec_corr,
         ls='--',
         lw=2
     )
     axt.xaxis.set_ticklabels([])
 
-    density_scatter(
-        df.Dec,
-        df.log10ratio_after_full_cor,
+    weighted_plot(
+        df.Dec.values,
+        df.log10ratio_after_full_cor.values,
+        (df.flux / df.local_rms).values,
         ax1,
-        alpha=0.003,
         marker='.',
         edgecolor='None'
     )
@@ -123,11 +151,13 @@ if __name__ == '__main__':
     parser.add_argument('comp_path', type=str, help='Path to rescale component catalogue output')
     parser.add_argument('coeffs', type=str, help='Path to numpy polunomial coefficents')
     parser.add_argument('-o', '--out-path', default=None, type=str, help='Output file to save plot as')
+    parser.add_argument('-n', '--nsrcs', type=int, default=10000, help='Numberof sources to plot (nrightes first)')
 
     args = parser.parse_args()
 
     make_plot(
         args.comp_path,
         args.coeffs,
-        out_path=args.out_path
+        out_path=args.out_path,
+        nsrcs=args.nsrcs
     )
