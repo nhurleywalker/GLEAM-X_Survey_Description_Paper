@@ -8,14 +8,11 @@ from matplotlib import cm
 from matplotlib.colors import Normalize 
 from scipy.interpolate import interpn
 
-
-
 plt.rcParams.update({
     "text.usetex": True,
     "font.family": "serif",
     "font.size": 10}
 )
-
 
 def density_scatter( x , y, ax = None, sort = True, bins = 20, **kwargs )   :
     """
@@ -72,6 +69,8 @@ def make_plot(comp_path, coeffs_path, out_path=None, nsrcs=None):
 
     dec_min = np.min(df.Dec)
     dec_max = np.max(df.Dec)
+
+    ratio_min, ratio_max = -0.1, 0.1
     
     dec_range = np.linspace(
         dec_min,
@@ -100,7 +99,7 @@ def make_plot(comp_path, coeffs_path, out_path=None, nsrcs=None):
     axt.plot(
         dec_range,
         dec_corr,
-        ls='--',
+        ls='-',
         lw=2
     )
     axt.xaxis.set_ticklabels([])
@@ -116,7 +115,8 @@ def make_plot(comp_path, coeffs_path, out_path=None, nsrcs=None):
 
     axr.hist(
         df.log10ratio_after_full_cor,
-        bins=20,
+        bins=25,
+        range=[ratio_min, ratio_max],
         orientation='horizontal',
         histtype='step'
     )
@@ -125,12 +125,14 @@ def make_plot(comp_path, coeffs_path, out_path=None, nsrcs=None):
     ax1.set(
         xlabel='Declination (Deg)',
         xlim=[dec_min, dec_max],
-        ylabel='Corrected Ratio'
+        ylim=[ratio_min, ratio_max],
+        ylabel='$\log_{10} R$ (corrected)'
     )
     ax1.grid(axis='both')
     axt.set(
         xlim=[dec_min, dec_max],
-        ylabel='Log Ratio'
+        ylim=[ratio_min, ratio_max],
+        ylabel='$\log_{10} R$ (uncorrected)'
     )
     axt.grid(axis='both')
 
