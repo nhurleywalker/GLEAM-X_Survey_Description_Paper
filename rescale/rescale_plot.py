@@ -123,7 +123,7 @@ def make_plot(comp_path, coeffs_path, out_path=None, nsrcs=None):
     axr.yaxis.set_tick_params(labelleft=False)
 
     ax1.set(
-        xlabel='Declination (Deg)',
+        xlabel='Declination ($^\circ$)',
         xlim=[dec_min, dec_max],
         ylim=[ratio_min, ratio_max],
         ylabel='$\log_{10} R$ (corrected)'
