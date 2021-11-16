@@ -6,8 +6,8 @@ import numpy as np
 
 plt.rcParams.update({
     "text.usetex": True,
-    "font.family": "serif",
-    "font.size": 10}
+    "font.family": "sans-serif",
+    "font.size": 12}
 )
 
 #plt.rcParams["patch.force_edgecolor"] = True
@@ -30,6 +30,8 @@ ax.set_xlabel("Central frequency / MHz")
 ax.set_ylabel("RMS noise / mJy beam$^{-1}$")
 c = ax.scatter(dataset["mean_freq"], dataset["S-min"]/5, s = 20*dataset["resolution"], c = dataset["area"]/1000, cmap="cool", alpha=0.7)
 for i, txt in enumerate(dataset["Name"]):
+    if txt == "GLEAM-X":
+        txt = "\\textbf{GLEAM-X}"
     ax.annotate(txt, (0.7*dataset["mean_freq"][i], 1.2*dataset["S-min"][i]/5))
 ax.errorbar(dataset["mean_freq"], dataset["S-min"]/5, xerr = dataset["bandwidth"]/2, fmt="", color="k", linestyle="", lw=0.5)
 cb = plt.colorbar(c, cax = cax)
