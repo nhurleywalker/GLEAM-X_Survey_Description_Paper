@@ -1,0 +1,7 @@
+injected_sources = /astro/mwasci/tgalvin/Mosaic_GLEAMX_Version2/Coadd_Mosaic/IDR_v1/170-231MHz_Reference_Results_Deep_EPS5/Completeness/source_pos/source_pos.txt
+detected_sources = /astro/mwasci/tgalvin/Mosaic_GLEAMX_Version2/Coadd_Mosaic/IDR_v1/170-231MHz_Reference_Results_Deep_EPS5/Completeness/inject
+flux = -3,-0.5,0.1
+template_map = /astro/mwasci/tgalvin/Mosaic_GLEAMX_Version2/Coadd_Mosaic/IDR_v1/170-231MHz_Reference_Results_Deep_EPS5/Completeness/input_images/XG_170-231MHz_projpsf_psf.fits
+region = 75,195,-40,-13
+rad = 6
+output_dir = /astro/mwasci/tgalvin/Mosaic_GLEAMX_Version2/Coadd_Mosaic/IDR_v1/170-231MHz_Reference_Results_Deep_EPS5/Completeness/results
