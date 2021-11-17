@@ -2,11 +2,15 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import pandas as pd
 import numpy as np
+from matplotlib.ticker import FuncFormatter
+from matplotlib.ticker import FormatStrFormatter
 
+def S(nu, nu0, S0, alpha):
+   return S0 * (nu/nu0)**alpha
 
 plt.rcParams.update({
     "text.usetex": True,
-    "font.family": "sans-serif",
+    "font.family": "serif",
     "font.size": 12}
 )
 
@@ -20,6 +24,7 @@ dataset = pd.read_csv("RadioContinuumSurveys_downselected.csv", delimiter=",", h
 
 # plt.xkcd()
 
+nu = np.arange(1,1e4)
 
 fig = plt.figure(figsize=(5,5))
 ax = fig.add_axes([0.1,0.1,0.8,0.8])
@@ -28,12 +33,21 @@ ax.set_xscale("log")
 ax.set_yscale("log")
 ax.set_xlabel("Central frequency / MHz")
 ax.set_ylabel("RMS noise / mJy beam$^{-1}$")
-c = ax.scatter(dataset["mean_freq"], dataset["S-min"]/5, s = 20*dataset["resolution"], c = dataset["area"]/1000, cmap="cool", alpha=0.7)
+c = ax.scatter(dataset["mean_freq"], dataset["S-min"]/5, s = 50*np.sqrt(dataset["resolution"]), c = dataset["area"]/1000, cmap="cool", alpha=0.7, zorder = 10)
 for i, txt in enumerate(dataset["Name"]):
     if txt == "GLEAM-X":
         txt = "\\textbf{GLEAM-X}"
-    ax.annotate(txt, (0.7*dataset["mean_freq"][i], 1.2*dataset["S-min"][i]/5))
+    ax.annotate(txt, (0.7*dataset["mean_freq"][i], 1.2*dataset["S-min"][i]/5), zorder = 100)
 ax.errorbar(dataset["mean_freq"], dataset["S-min"]/5, xerr = dataset["bandwidth"]/2, fmt="", color="k", linestyle="", lw=0.5)
+ax.plot(nu, S(nu, 200., 1., -0.7), lw = 0.5, color="grey", label="$\\alpha=-0.7$", zorder = 1)
+ax.plot(nu, S(nu, 200., 1., -2.5), lw = 0.5, color="grey", ls="--", label="$\\alpha=-2.5$", zorder = 1)
+ax.set_ylim(1.e-3, 2e2)
+ax.set_xlim(10., 7e3)
+# I prefer "100, 1000" to "10^2, 10^3"
+ax.xaxis.set_major_formatter(FormatStrFormatter('%3.0f'))
+#https://stackoverflow.com/questions/21920233/matplotlib-log-scale-tick-label-number-formatting
+ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: '{:g}'.format(y)))
+ax.legend()
 cb = plt.colorbar(c, cax = cax)
 cb.set_label("Sky area ($\\times1000$ sq.deg.)")
 # Removes weird striping in colorbar
