@@ -180,8 +180,8 @@ def create_astrometry(
         logger.debug(f"{k} {v}")
 
     if latex_output is True:
-        print("RA astrometric offset (mas) & ${0:+3.1f}\pm{1:3.1f}$ \\\\".format(1000*info['ra_mean_delta'], info['ra_std_delta']))
-        print("Dec astrometric offset (mas) & ${0:+3.1f}\pm{1:3.1f}$ \\\\".format(1000*info['dec_mean_delta'], info['dec_std_delta']))
+        print("RA astrometric offset (mas) & ${0:+3.0f}\pm{1:3.0f}$ \\\\".format(1000*info['ra_mean_delta'], 1000*info['ra_std_delta']))
+        print("Dec astrometric offset (mas) & ${0:+3.0f}\pm{1:3.0f}$ \\\\".format(1000*info['dec_mean_delta'], 1000*info['dec_std_delta']))
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Creates the astrometry plots for the GLEAM-X IDR1 paper')
