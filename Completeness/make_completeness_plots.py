@@ -27,7 +27,7 @@ def make_curve_plot(stats, flux_levels, base_out):
                 flux_levels,
     )
 
-    fig, ax = plt.subplots(1,1, figsize=(4,4))
+    fig, ax = plt.subplots(1,1, figsize=(3.5,3))
 
     ax.errorbar(
         flux_levels,
@@ -71,7 +71,7 @@ def overlay_box(ax, text, x=0.02, y=0.125):
 
 def make_spatial_plot(comp_cube, flux_levels, w, base_out, cmap='inferno'):
     
-    fig = plt.figure(figsize=(10, 5))
+    fig = plt.figure(figsize=(7, 3))
 
     ax1 = fig.add_subplot(4,1,1, projection=w)
     divider = make_axes_locatable(ax1)
@@ -192,7 +192,7 @@ def make_spatial_plot2(comp_cube, flux_levels, w, base_out, cmap='inferno'):
     for loc in (ax1_loc, ax2_loc, ax3_loc, ax4_loc):
         print(loc)
 
-    fig = plt.figure(figsize=(10, 5))
+    fig = plt.figure(figsize=(7, 3))
 
     cax = fig.add_axes([0.865, 0.1, 0.0085, offset_y(3) + delta_y])
     ax1 = fig.add_axes(ax1_loc, projection=w)
