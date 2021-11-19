@@ -56,7 +56,7 @@ def make_curve_plot(stats, flux_levels, base_out):
     ax.xaxis.set_major_formatter(FormatStrFormatter('%3.0f'))
 
     fig.tight_layout()
-    fig.savefig(f'{base_out}_curve.pdf')
+    fig.savefig(f'{base_out}_curve.pdf', bbox_inches="tight")
 
 
 def overlay_box(ax, text, x=0.02, y=0.125):
@@ -194,8 +194,8 @@ def make_spatial_plot(comp_cube, flux_levels, w, base_out, cmap='inferno'):
 
 
     fig.tight_layout()
-    fig.savefig(f"{base_out}_spatial.png")
-    fig.savefig(f"{base_out}_spatial.pdf")
+    fig.savefig(f"{base_out}_spatial.png", bbox_inches="tight")
+    fig.savefig(f"{base_out}_spatial.pdf", bbox_inches="tight")
 
 
 
