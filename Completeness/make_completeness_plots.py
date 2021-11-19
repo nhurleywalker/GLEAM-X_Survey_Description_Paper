@@ -156,6 +156,7 @@ def make_spatial_plot(comp_cube, flux_levels, w, base_out, cmap='inferno'):
     ax3.set(
         xlim=x_lim,
         ylim=y_lim,
+        xlabel='RA',
         ylabel='Dec'
     )
     lon = ax3.coords[0]
