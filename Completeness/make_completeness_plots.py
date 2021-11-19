@@ -6,11 +6,16 @@ import matplotlib.axes as maxes
 from scipy.interpolate import interp1d
 from astropy.io import fits
 from astropy.wcs import WCS
-from astropy.visualization.wcsaxes import Quadrangle
+#from astropy.visualization.wcsaxes import Quadrangle
 from astropy.coordinates import SkyCoord
 import astropy.units as u
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from mpl_toolkits.axes_grid1.mpl_axes import Axes
+
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "serif",
+    "font.size": 8})
 
 LIMITS = [SkyCoord(i, unit=(u.hourangle, u.deg), frame='icrs') for i in ['14:00:00 -19:48:00','05:00:00 -35:26:00']]
 
@@ -44,7 +49,7 @@ def make_curve_plot(stats, flux_levels, base_out):
     ax.set(
         xscale='log',
         xlabel='Flux density (mJy)',
-        ylabel='Completeness (%)',
+        ylabel='Completeness (\%)',
     )
 
     fig.tight_layout()
@@ -79,7 +84,7 @@ def make_spatial_plot(comp_cube, flux_levels, w, base_out, cmap='inferno'):
         ylim=[50,70],
         ylabel='Dec'
     )
-    overlay_box(ax1, f"{flux_levels[6]:.2f} mJy")
+    overlay_box(ax1, f"{flux_levels[6]:.0f} mJy")
     overlay_box(ax1, "(a)", y=0.75)
 
     lon = ax1.coords[0]
@@ -103,7 +108,7 @@ def make_spatial_plot(comp_cube, flux_levels, w, base_out, cmap='inferno'):
     lon = ax2.coords[0]
     lon.set_ticklabel_visible(False)
     lon.set_axislabel('')
-    overlay_box(ax2, f"{flux_levels[9]:.2f} mJy")
+    overlay_box(ax2, f"{flux_levels[9]:.0f} mJy")
     overlay_box(ax2, "(b)", y=0.75)
     
 
@@ -123,7 +128,7 @@ def make_spatial_plot(comp_cube, flux_levels, w, base_out, cmap='inferno'):
     lon = ax3.coords[0]
     lon.set_ticklabel_visible(False)
     lon.set_axislabel('')
-    overlay_box(ax3, f"{flux_levels[12]:.2f} mJy")
+    overlay_box(ax3, f"{flux_levels[12]:.0f} mJy")
     overlay_box(ax3, "(c)", y=0.75)
 
 
@@ -142,11 +147,11 @@ def make_spatial_plot(comp_cube, flux_levels, w, base_out, cmap='inferno'):
         xlabel='RA',
         ylabel='Dec'
     )
-    overlay_box(ax4, f"{flux_levels[15]:.2f} mJy")
+    overlay_box(ax4, f"{flux_levels[15]:.0f} mJy")
     overlay_box(ax4, "(d)", y=0.75)
 
 
-    cbar = fig.colorbar(cim, cax=cax, label='Completeness (%)', orientation='horizontal')
+    cbar = fig.colorbar(cim, cax=cax, label='Completeness (\%)', orientation='horizontal')
 
     cbar.ax.xaxis.set_ticks_position('top')
     cbar.ax.xaxis.set_label_position('top')
@@ -200,7 +205,7 @@ def make_spatial_plot2(comp_cube, flux_levels, w, base_out, cmap='inferno'):
         ylim=y_lim,
         ylabel='Dec'
     )
-    overlay_box(ax1, f"{flux_levels[6]:.2f} mJy")
+    overlay_box(ax1, f"{flux_levels[6]:.0f} mJy")
     overlay_box(ax1, "(a)", y=0.75)
 
     lon = ax1.coords[0]
@@ -225,7 +230,7 @@ def make_spatial_plot2(comp_cube, flux_levels, w, base_out, cmap='inferno'):
     lon = ax2.coords[0]
     lon.set_ticklabel_visible(False)
     lon.set_axislabel('')
-    overlay_box(ax2, f"{flux_levels[9]:.2f} mJy")
+    overlay_box(ax2, f"{flux_levels[9]:.0f} mJy")
     overlay_box(ax2, "(b)", y=0.75)
     
 
@@ -248,7 +253,7 @@ def make_spatial_plot2(comp_cube, flux_levels, w, base_out, cmap='inferno'):
     lon = ax3.coords[0]
     lon.set_ticklabel_visible(False)
     lon.set_axislabel('')
-    overlay_box(ax3, f"{flux_levels[12]:.2f} mJy")
+    overlay_box(ax3, f"{flux_levels[12]:.0f} mJy")
     overlay_box(ax3, "(c)", y=0.75)
 
     ax4 = fig.add_axes(ax4_loc, projection=w)
@@ -269,11 +274,11 @@ def make_spatial_plot2(comp_cube, flux_levels, w, base_out, cmap='inferno'):
         xlabel='RA',
         ylabel='Dec'
     )
-    overlay_box(ax4, f"{flux_levels[15]:.2f} mJy")
+    overlay_box(ax4, f"{flux_levels[15]:.0f} mJy")
     overlay_box(ax4, "(d)", y=0.75)
 
 
-    cbar = fig.colorbar(cim, cax=cax, label='Completeness (%)')
+    cbar = fig.colorbar(cim, cax=cax, label='Completeness (\%)')
 
     cbar.ax.xaxis.set_ticks_position('top')
     cbar.ax.xaxis.set_label_position('top')
