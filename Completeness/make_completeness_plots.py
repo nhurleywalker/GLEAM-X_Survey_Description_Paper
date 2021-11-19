@@ -159,9 +159,9 @@ def make_spatial_plot(comp_cube, flux_levels, w, base_out, cmap='inferno'):
         xlabel='RA',
         ylabel='Dec'
     )
-    lon = ax3.coords[0]
-    lon.set_ticklabel_visible(False)
-    lon.set_axislabel('')
+#    lon = ax3.coords[0]
+#    lon.set_ticklabel_visible(False)
+#    lon.set_axislabel('')
     overlay_box(ax3, f"{flux_levels[12]:.0f} mJy")
     overlay_box(ax3, "(c)", y=0.75)
 
