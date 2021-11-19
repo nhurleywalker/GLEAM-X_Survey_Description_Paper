@@ -11,13 +11,14 @@ from astropy.coordinates import SkyCoord
 import astropy.units as u
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from mpl_toolkits.axes_grid1.mpl_axes import Axes
+from matplotlib.ticker import FormatStrFormatter
 
 plt.rcParams.update({
     "text.usetex": True,
     "font.family": "serif",
     "font.size": 8})
 
-LIMITS = [SkyCoord(i, unit=(u.hourangle, u.deg), frame='icrs') for i in ['14:00:00 -19:48:00','05:00:00 -35:26:00']]
+LIMITS = [SkyCoord(i, unit=(u.hourangle, u.deg), frame='icrs') for i in ['13:00:00 -20:42:00','04:00:00 -32:42:00']]
 
 
 def make_curve_plot(stats, flux_levels, base_out):
@@ -51,6 +52,8 @@ def make_curve_plot(stats, flux_levels, base_out):
         xlabel='Flux density (mJy)',
         ylabel='Completeness (\%)',
     )
+# Remove unnecessary scientific notation
+    ax.xaxis.set_major_formatter(FormatStrFormatter('%3.0f'))
 
     fig.tight_layout()
     fig.savefig(f'{base_out}_curve.pdf')
@@ -77,7 +80,7 @@ def make_spatial_plot(comp_cube, flux_levels, w, base_out, cmap='inferno'):
     ax1.imshow(
         comp_cube[0].data[6],
         vmin=0,
-        vmax=100, cmap='inferno'
+        vmax=100, cmap=cmap
     )
     ax1.set(
         xlim=[149, 284],
@@ -98,7 +101,7 @@ def make_spatial_plot(comp_cube, flux_levels, w, base_out, cmap='inferno'):
         comp_cube[0].data[9],
         vmin=0,
         vmax=100, 
-        cmap='inferno'
+        cmap=cmap,
     )
     ax2.set(
         xlim=[149, 284],
@@ -118,7 +121,7 @@ def make_spatial_plot(comp_cube, flux_levels, w, base_out, cmap='inferno'):
         comp_cube[0].data[12],
         vmin=0,
         vmax=100, 
-        cmap='inferno'
+        cmap=cmap,
     )
     ax3.set(
         xlim=[149, 284],
@@ -139,7 +142,7 @@ def make_spatial_plot(comp_cube, flux_levels, w, base_out, cmap='inferno'):
         comp_cube[0].data[15],
         vmin=0,
         vmax=100, 
-        cmap='inferno'
+        cmap=cmap,
     )
     ax4.set(
         xlim=[149, 284],
@@ -197,7 +200,7 @@ def make_spatial_plot2(comp_cube, flux_levels, w, base_out, cmap='inferno'):
     ax1.imshow(
         comp_cube[0].data[6],
         vmin=0,
-        vmax=100, cmap='inferno',
+        vmax=100, cmap=cmap,
         aspect='auto'
     )
     ax1.set(
@@ -219,7 +222,7 @@ def make_spatial_plot2(comp_cube, flux_levels, w, base_out, cmap='inferno'):
         comp_cube[0].data[9],
         vmin=0,
         vmax=100, 
-        cmap='inferno',
+        cmap=cmap,
         aspect='auto'
     )
     ax2.set(
@@ -242,7 +245,7 @@ def make_spatial_plot2(comp_cube, flux_levels, w, base_out, cmap='inferno'):
         comp_cube[0].data[12],
         vmin=0,
         vmax=100, 
-        cmap='inferno',
+        cmap=cmap,
         aspect='auto'
     )
     ax3.set(
@@ -265,7 +268,7 @@ def make_spatial_plot2(comp_cube, flux_levels, w, base_out, cmap='inferno'):
         comp_cube[0].data[15],
         vmin=0,
         vmax=100, 
-        cmap='inferno',
+        cmap=cmap,
         aspect='auto'
     )
     ax4.set(
