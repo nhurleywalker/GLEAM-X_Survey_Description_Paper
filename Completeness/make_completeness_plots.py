@@ -156,6 +156,108 @@ def make_spatial_plot(comp_cube, flux_levels, w, base_out, cmap='inferno'):
     fig.savefig(f"{base_out}_spatial.pdf")
 
 
+
+def make_spatial_plot2(comp_cube, flux_levels, w, base_out, cmap='inferno'):
+    
+    fig = plt.figure(figsize=(10, 5))
+
+
+
+    cax = fig.add_axes([0.865, 0.15, 0.0085, 0.835])
+    ax1 = fig.add_axes([0.05, 0.78, 0.95, 0.2], projection=w)
+    
+    ax1.imshow(
+        comp_cube[0].data[6],
+        vmin=0,
+        vmax=100, cmap='inferno'
+    )
+    ax1.set(
+        xlim=[149, 284],
+        ylim=[50,70],
+        ylabel='Dec'
+    )
+    overlay_box(ax1, f"{flux_levels[6]:.2f} mJy")
+    overlay_box(ax1, "(a)", y=0.75)
+
+    lon = ax1.coords[0]
+    lon.set_ticklabel_visible(False)
+    lon.set_axislabel('')
+
+
+    ax2 = fig.add_axes([0.05, 0.57, 0.95, 0.2], projection=w)
+    # ax2 = divider.append_axes('bottom', pad='3%', size='100%')
+    ax2.imshow(
+        comp_cube[0].data[9],
+        vmin=0,
+        vmax=100, 
+        cmap='inferno'
+    )
+    ax2.set(
+        xlim=[149, 284],
+        ylim=[50,70],
+        ylabel='Dec'
+    )
+    lon = ax2.coords[0]
+    lon.set_ticklabel_visible(False)
+    lon.set_axislabel('')
+    overlay_box(ax2, f"{flux_levels[9]:.2f} mJy")
+    overlay_box(ax2, "(b)", y=0.75)
+    
+
+    ax3 = fig.add_axes([0.05, 0.36, 0.95, 0.2], projection=w)
+
+    # ax3 = fig.add_subplot(4,1,3, projection=w)
+    # # ax3 = divider.append_axes('bottom', pad='3%', size='100%')
+    ax3.imshow(
+        comp_cube[0].data[12],
+        vmin=0,
+        vmax=100, 
+        cmap='inferno'
+    )
+    ax3.set(
+        xlim=[149, 284],
+        ylim=[50,70],
+        ylabel='Dec'
+    )
+    lon = ax3.coords[0]
+    lon.set_ticklabel_visible(False)
+    lon.set_axislabel('')
+    overlay_box(ax3, f"{flux_levels[12]:.2f} mJy")
+    overlay_box(ax3, "(c)", y=0.75)
+
+    ax4 = fig.add_axes([0.05, 0.15, 0.95, 0.2], projection=w)
+
+    # ax4 = fig.add_subplot(4,1,4, projection=w)
+    # # divider = make_axes_locatable(ax3)
+    # # ax4 = divider.append_axes('bottom', pad='3%', size='100%')
+    cim = ax4.imshow(
+        comp_cube[0].data[15],
+        vmin=0,
+        vmax=100, 
+        cmap='inferno'
+    )
+    ax4.set(
+        xlim=[149, 284],
+        ylim=[50,70],
+        xlabel='RA',
+        ylabel='Dec'
+    )
+    overlay_box(ax4, f"{flux_levels[15]:.2f} mJy")
+    overlay_box(ax4, "(d)", y=0.75)
+
+
+    cbar = fig.colorbar(cim, cax=cax, label='Completeness (%)')
+
+    cbar.ax.xaxis.set_ticks_position('top')
+    cbar.ax.xaxis.set_label_position('top')
+
+
+    fig.savefig(f"{base_out}_spatial.png")
+    fig.savefig(f"{base_out}_spatial.pdf")
+
+
+
+
 def make_completeness_plots(comp_cube, base_out='Completeness', s_min=-3, s_max=-0.5, s_step=0.1):
     comp_cube_fits = fits.open(comp_cube)
 
@@ -182,7 +284,7 @@ def make_completeness_plots(comp_cube, base_out='Completeness', s_min=-3, s_max=
 
 
     make_curve_plot(stats, slin, base_out)
-    make_spatial_plot(comp_cube_fits, slin, w, base_out)
+    make_spatial_plot2(comp_cube_fits, slin, w, base_out)
 
 
 if __name__ == '__main__':
