@@ -51,6 +51,15 @@ def make_curve_plot(stats, flux_levels, base_out):
     fig.savefig(f'{base_out}_curve.pdf')
 
 
+def overlay_box(ax, text, x=0.02, y=0.125):
+    ax.text(
+        x, 
+        y,
+        text, 
+        transform=ax.transAxes,
+        bbox=dict(facecolor='white', alpha=0.4, edgecolor='black', boxstyle='round,pad=0.25')
+    )
+
 
 def make_spatial_plot(comp_cube, flux_levels, w, base_out, cmap='inferno'):
     
@@ -70,6 +79,9 @@ def make_spatial_plot(comp_cube, flux_levels, w, base_out, cmap='inferno'):
         ylim=[50,70],
         ylabel='Dec'
     )
+    overlay_box(ax1, f"{flux_levels[6]:.2f} mJy")
+    overlay_box(ax1, "(a)", y=0.75)
+
     lon = ax1.coords[0]
     lon.set_ticklabel_visible(False)
     lon.set_axislabel('')
@@ -91,7 +103,9 @@ def make_spatial_plot(comp_cube, flux_levels, w, base_out, cmap='inferno'):
     lon = ax2.coords[0]
     lon.set_ticklabel_visible(False)
     lon.set_axislabel('')
-
+    overlay_box(ax2, f"{flux_levels[9]:.2f} mJy")
+    overlay_box(ax2, "(b)", y=0.75)
+    
 
     ax3 = fig.add_subplot(4,1,3, projection=w)
     # ax3 = divider.append_axes('bottom', pad='3%', size='100%')
@@ -109,6 +123,8 @@ def make_spatial_plot(comp_cube, flux_levels, w, base_out, cmap='inferno'):
     lon = ax3.coords[0]
     lon.set_ticklabel_visible(False)
     lon.set_axislabel('')
+    overlay_box(ax3, f"{flux_levels[12]:.2f} mJy")
+    overlay_box(ax3, "(c)", y=0.75)
 
 
     ax4 = fig.add_subplot(4,1,4, projection=w)
@@ -126,6 +142,9 @@ def make_spatial_plot(comp_cube, flux_levels, w, base_out, cmap='inferno'):
         xlabel='RA',
         ylabel='Dec'
     )
+    overlay_box(ax4, f"{flux_levels[15]:.2f} mJy")
+    overlay_box(ax4, "(d)", y=0.75)
+
 
     cbar = fig.colorbar(cim, cax=cax, label='Completeness (%)', orientation='horizontal')
 
