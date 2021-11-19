@@ -158,22 +158,46 @@ def make_spatial_plot(comp_cube, flux_levels, w, base_out, cmap='inferno'):
 
 
 def make_spatial_plot2(comp_cube, flux_levels, w, base_out, cmap='inferno'):
-    
+
+    limits = SkyCoord(
+        np.array((4*15, 13*15))*u.deg,
+        np.array((-32.7, -20.7))*u.deg
+        )
+    pix_limits = w.all_world2pix(limits.ra, limits.dec, 0)
+    x_lim = pix_limits[0][::-1]
+    y_lim = pix_limits[1]
+
+    print(pix_limits)
+    print(x_lim)
+    print(y_lim)
+
+    start_x, start_y = 0.15, 0.1
+    delta_x, delta_y = 0.7, 0.2
+    pad_y = 0.01
+    offset_y = lambda x: x * (delta_y + pad_y) 
+
+    ax4_loc = [start_x, start_y, delta_x, delta_y]
+    ax3_loc = [start_x, start_y+offset_y(1), delta_x, delta_y]
+    ax2_loc = [start_x, start_y+offset_y(2), delta_x, delta_y]
+    ax1_loc = [start_x, start_y+offset_y(3), delta_x, delta_y]
+
+    for loc in (ax1_loc, ax2_loc, ax3_loc, ax4_loc):
+        print(loc)
+
     fig = plt.figure(figsize=(10, 5))
 
-
-
-    cax = fig.add_axes([0.865, 0.15, 0.0085, 0.835])
-    ax1 = fig.add_axes([0.05, 0.78, 0.95, 0.2], projection=w)
+    cax = fig.add_axes([0.865, 0.1, 0.0085, 0.835])
+    ax1 = fig.add_axes(ax1_loc, projection=w)
     
     ax1.imshow(
         comp_cube[0].data[6],
         vmin=0,
-        vmax=100, cmap='inferno'
+        vmax=100, cmap='inferno',
+        aspect='auto'
     )
     ax1.set(
-        xlim=[149, 284],
-        ylim=[50,70],
+        xlim=x_lim,
+        ylim=y_lim,
         ylabel='Dec'
     )
     overlay_box(ax1, f"{flux_levels[6]:.2f} mJy")
@@ -184,17 +208,18 @@ def make_spatial_plot2(comp_cube, flux_levels, w, base_out, cmap='inferno'):
     lon.set_axislabel('')
 
 
-    ax2 = fig.add_axes([0.05, 0.57, 0.95, 0.2], projection=w)
+    ax2 = fig.add_axes(ax2_loc, projection=w)
     # ax2 = divider.append_axes('bottom', pad='3%', size='100%')
     ax2.imshow(
         comp_cube[0].data[9],
         vmin=0,
         vmax=100, 
-        cmap='inferno'
+        cmap='inferno',
+        aspect='auto'
     )
     ax2.set(
-        xlim=[149, 284],
-        ylim=[50,70],
+        xlim=x_lim,
+        ylim=y_lim,
         ylabel='Dec'
     )
     lon = ax2.coords[0]
@@ -204,7 +229,7 @@ def make_spatial_plot2(comp_cube, flux_levels, w, base_out, cmap='inferno'):
     overlay_box(ax2, "(b)", y=0.75)
     
 
-    ax3 = fig.add_axes([0.05, 0.36, 0.95, 0.2], projection=w)
+    ax3 = fig.add_axes(ax3_loc, projection=w)
 
     # ax3 = fig.add_subplot(4,1,3, projection=w)
     # # ax3 = divider.append_axes('bottom', pad='3%', size='100%')
@@ -212,11 +237,12 @@ def make_spatial_plot2(comp_cube, flux_levels, w, base_out, cmap='inferno'):
         comp_cube[0].data[12],
         vmin=0,
         vmax=100, 
-        cmap='inferno'
+        cmap='inferno',
+        aspect='auto'
     )
     ax3.set(
-        xlim=[149, 284],
-        ylim=[50,70],
+        xlim=x_lim,
+        ylim=y_lim,
         ylabel='Dec'
     )
     lon = ax3.coords[0]
@@ -225,7 +251,7 @@ def make_spatial_plot2(comp_cube, flux_levels, w, base_out, cmap='inferno'):
     overlay_box(ax3, f"{flux_levels[12]:.2f} mJy")
     overlay_box(ax3, "(c)", y=0.75)
 
-    ax4 = fig.add_axes([0.05, 0.15, 0.95, 0.2], projection=w)
+    ax4 = fig.add_axes(ax4_loc, projection=w)
 
     # ax4 = fig.add_subplot(4,1,4, projection=w)
     # # divider = make_axes_locatable(ax3)
@@ -234,11 +260,12 @@ def make_spatial_plot2(comp_cube, flux_levels, w, base_out, cmap='inferno'):
         comp_cube[0].data[15],
         vmin=0,
         vmax=100, 
-        cmap='inferno'
+        cmap='inferno',
+        aspect='auto'
     )
     ax4.set(
-        xlim=[149, 284],
-        ylim=[50,70],
+        xlim=x_lim,
+        ylim=y_lim,
         xlabel='RA',
         ylabel='Dec'
     )
@@ -252,6 +279,7 @@ def make_spatial_plot2(comp_cube, flux_levels, w, base_out, cmap='inferno'):
     cbar.ax.xaxis.set_label_position('top')
 
 
+    fig.tight_layout()
     fig.savefig(f"{base_out}_spatial.png")
     fig.savefig(f"{base_out}_spatial.pdf")
 
