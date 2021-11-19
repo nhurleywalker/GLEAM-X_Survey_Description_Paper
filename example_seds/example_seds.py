@@ -54,7 +54,6 @@ def make_small_ax(ax, nu, xlabel=None, onright=False):
 
     if xlabel is None:
         print('--Setting to None')
-        ax.xaxis.set_ticklabels([])
         ax.set_xticklabels([])
         ax.set_xticks([])
     else:
