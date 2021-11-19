@@ -186,7 +186,7 @@ def make_spatial_plot2(comp_cube, flux_levels, w, base_out, cmap='inferno'):
 
     fig = plt.figure(figsize=(10, 5))
 
-    cax = fig.add_axes([0.865, 0.1, 0.0085, 0.835])
+    cax = fig.add_axes([0.865, 0.1, 0.0085, offset_y(3) + delta_y])
     ax1 = fig.add_axes(ax1_loc, projection=w)
     
     ax1.imshow(
