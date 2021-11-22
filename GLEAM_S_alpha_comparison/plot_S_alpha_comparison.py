@@ -36,39 +36,80 @@ sep_constraint = d2d <= max_sep
 gxm = gx[sep_constraint]
 glm = gl[idx[sep_constraint]]
 
-xmin = 0.02
-xmax = 25.
-# Dummy x for f(x)
-x = np.arange(xmin, xmax+10)
 
-fig = plt.figure(figsize=(5,5))
-ax = fig.add_axes([0.1,0.1,0.8,0.8])
-ax.set_aspect("equal")
-ax.set_xlabel("GLEAM $S_\mathrm{200MHz,fitted}$ / Jy")
-ax.set_ylabel("GLEAM-X $S_\mathrm{200MHz,fitted}$ / Jy")
-ax.set_xscale("log")
-ax.set_yscale("log")
-ax.set_xlim([xmin, xmax])
-ax.set_ylim([xmin, xmax])
-ax.plot(x, x, zorder = 20, color="k", lw=0.5, ls="-")
-x = glm["int_flux_fit_200"]
-y = gxm["sp_norm"]
+makeS = False
+# It takes four minutes to generate this plot because of the error bar loop, so make it optional
+if makeS is True:
+    xmin = 0.02
+    xmax = 25.
+    # Dummy x for f(x)
+    x = np.arange(xmin, xmax+10)
 
-xerr = glm["err_int_flux_fit_200"]
-yerr = gxm["sp_norm_err"]
+    fig = plt.figure(figsize=(5,5))
+    ax = fig.add_axes([0.1,0.1,0.8,0.8])
+    ax.set_aspect("equal")
+    ax.set_xlabel("GLEAM $S_\mathrm{200MHz,fitted}$ / Jy")
+    ax.set_ylabel("GLEAM-X $S_\mathrm{200MHz,fitted}$ / Jy")
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.set_xlim([xmin, xmax])
+    ax.set_ylim([xmin, xmax])
+    ax.plot(x, x, zorder = 20, color="k", lw=0.5, ls="-")
+    x = glm["int_flux_fit_200"]
+    y = gxm["sp_norm"]
 
-xy = np.log10(np.vstack([x,y]))
-z = gaussian_kde(xy)(xy)
-# Normalise
-z = z / np.max(z)
+    xerr = glm["err_int_flux_fit_200"]
+    yerr = gxm["sp_norm_err"]
 
-# Have to do this in a loop because of reasons...
-# https://github.com/matplotlib/matplotlib/issues/16317
-for xp, yp, xerrp, yerrp, zp in zip(x, y, xerr, yerr, z):
-    ax.errorbar(xp, yp, xerr = xerrp, yerr = yerrp, fmt="none", elinewidth = 0.5, lw=0, zorder=zp, ecolor = viridis(zp))
-    ax.scatter(xp, yp, marker=".", color = viridis(zp), s = 2, zorder=zp)
+    xy = np.log10(np.vstack([x,y]))
+    z = gaussian_kde(xy)(xy)
+    # Normalise
+    z = z / np.max(z)
 
-ax.xaxis.set_major_formatter(FuncFormatter(lambda y, _: '{:g}'.format(y)))
-ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: '{:g}'.format(y)))
+    # Have to do this in a loop because of reasons...
+    # https://github.com/matplotlib/matplotlib/issues/16317
+    for xp, yp, xerrp, yerrp, zp in zip(x, y, xerr, yerr, z):
+        ax.errorbar(xp, yp, xerr = xerrp, yerr = yerrp, fmt="none", elinewidth = 0.5, lw=0, zorder=zp, ecolor = viridis(zp))
+        ax.scatter(xp, yp, marker=".", color = viridis(zp), s = 2, zorder=zp)
 
-fig.savefig("GLEAM-X_GLEAM_S200_comparison.pdf", bbox_inches="tight")
+    ax.xaxis.set_major_formatter(FuncFormatter(lambda y, _: '{:g}'.format(y)))
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: '{:g}'.format(y)))
+
+    fig.savefig("GLEAM-X_GLEAM_S200_comparison.pdf", bbox_inches="tight")
+
+makeAlpha = True
+if makeAlpha is True:
+    xmin = -2.5
+    xmax = 2.5
+    # Dummy alpha
+    x = np.arange(xmin, xmax+0.1)
+
+    fig = plt.figure(figsize=(5,5))
+    ax = fig.add_axes([0.1,0.1,0.8,0.8])
+    ax.set_aspect("equal")
+    ax.set_xlabel("GLEAM $\alpha_\mathrm{fitted}$")
+    ax.set_ylabel("GLEAM-X $\alpha_\mathrm{fitted}$")
+    ax.set_xlim([xmin, xmax])
+    ax.set_ylim([xmin, xmax])
+    ax.plot(x, x, zorder = 20, color="k", lw=0.5, ls="-")
+    x = glm["alpha"]
+    y = gxm["sp_alpha"]
+
+    xerr = glm["err_alpha"]
+    yerr = gxm["sp_alpha_err"]
+
+    xy = np.log10(np.vstack([x,y]))
+    z = gaussian_kde(xy)(xy)
+    # Normalise
+    z = z / np.max(z)
+
+    # Have to do this in a loop because of reasons...
+    # https://github.com/matplotlib/matplotlib/issues/16317
+    for xp, yp, xerrp, yerrp, zp in zip(x, y, xerr, yerr, z):
+        ax.errorbar(xp, yp, xerr = xerrp, yerr = yerrp, fmt="none", elinewidth = 0.5, lw=0, zorder=zp, ecolor = viridis(zp))
+        ax.scatter(xp, yp, marker=".", color = viridis(zp), s = 2, zorder=zp)
+
+#    ax.xaxis.set_major_formatter(FuncFormatter(lambda y, _: '{:g}'.format(y)))
+#    ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: '{:g}'.format(y)))
+
+    fig.savefig("GLEAM-X_GLEAM_alpha_comparison.pdf", bbox_inches="tight")
