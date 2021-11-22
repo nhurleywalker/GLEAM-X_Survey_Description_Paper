@@ -1,7 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.pyplot as plt 
 
+from matplotlib.ticker import FormatStrFormatter
+
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "serif",
+    "font.size": 8})
 
 def pl(nu, norm, alpha):
     return norm * nu **alpha 
@@ -10,7 +15,7 @@ def pl(nu, norm, alpha):
 def make_ax1(ax1, nu):
     ax1.plot(
         nu,
-        pl(nu, 1., -0.8),
+        pl(nu, 100., -0.8),
     )
     ax1.grid(
         which='both',
@@ -20,14 +25,18 @@ def make_ax1(ax1, nu):
         xscale='log',
         yscale='log',
         xlabel='Frequency (MHz)',
-        ylabel='Flux (Jy',
+        ylabel='Flux density (Jy)',
         title='GLEAM-X$\,$J12345.1$-$9876543.23'
     )
+    ax1.xaxis.set_major_formatter(FormatStrFormatter('%3.0f'))
+    ax1.yaxis.set_major_formatter(FormatStrFormatter('%3.0f'))
+    ax1.yaxis.set_minor_formatter(FormatStrFormatter('%3.1f'))
+#    ax1.xaxis.set_minor_formatter(FormatStrFormatter('%3.0f'))
 
 def make_small_ax(ax, nu, xlabel=None, onright=False):
     ax.plot(
         nu,
-        pl(nu, 1., -0.8),
+        pl(nu, 100., -0.8),
     )
     ax.grid(
         which='both',
@@ -36,7 +45,7 @@ def make_small_ax(ax, nu, xlabel=None, onright=False):
     ax.set(
         xscale='log',
         yscale='log',
-        ylabel='Flux (Jy)',
+        ylabel='Flux density (Jy)',
     )
     
     if onright:
@@ -49,21 +58,23 @@ def make_small_ax(ax, nu, xlabel=None, onright=False):
         ax.set_xticks([])
     else:
         ax.set_xlabel(xlabel)    
+    ax.xaxis.set_major_formatter(FormatStrFormatter('%3.0f'))
+    ax.xaxis.set_minor_formatter(FormatStrFormatter('%3.0f'))
+    ax.yaxis.set_major_formatter(FormatStrFormatter('%3.0f'))
+    ax.yaxis.set_minor_formatter(FormatStrFormatter('%3.0f'))
 
 
-example_nu_large = np.geomspace(40, 2000, 200)
-example_nu = np.geomspace(40, 300, 200)
+example_nu_large = np.geomspace(65, 2000, 200)
+example_nu = np.geomspace(65, 270, 200)
 
 ax1_loc = (0.1, 0.6, 0.8, 0.35)
-
 ax2_loc = (0.1, 0.315, 0.395, 0.2)
 ax3_loc = (0.505, 0.315, 0.395, 0.2)
-
 ax4_loc = (0.1, 0.075, 0.395, 0.23)
 ax5_loc = (0.505, 0.075, 0.395, 0.23)
 
 
-fig = plt.figure(figsize=(10, 8))
+fig = plt.figure(figsize=(7, 5))
 
 ax1 = fig.add_axes(ax1_loc)
 make_ax1(ax1, example_nu_large)
