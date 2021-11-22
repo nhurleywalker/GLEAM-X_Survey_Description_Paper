@@ -14,11 +14,11 @@ def S(nu, nu0, S0, alpha):
 plt.rcParams.update({
     "text.usetex": True,
     "font.family": "serif",
-    "font.size": 12}
+    "font.size": 10}
 )
 
 # May need to adjust that last digit
-viridis = cm.get_cmap('viridis', 8)
+viridis = cm.get_cmap('viridis', 1000)
 
 hdu_gx = fits.open("../alpha_distribution/IDR_v1.1_joined_rescaled_cat_seds_subset.fits")
 gx = hdu_gx[1].data
