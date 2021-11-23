@@ -9,12 +9,10 @@ def S(nu, nu0, S0, alpha):
 plt.rcParams.update({
     "text.usetex": True,
     "font.family": "serif",
-    "font.size": 12}
+    "font.size": 8}
 )
 
-#plt.rcParams["patch.force_edgecolor"] = True
-#plt.rcParams['grid.linewidth'] = 0.1
-#plt.rcParams['axes.axisbelow'] = True
+cm = 1 / 2.54
 
 # To select these antennas I used the following criteria:
 # ants_east: East > 700 (43 antennas)
@@ -28,7 +26,7 @@ west = np.squeeze(np.where(dataset["East"] < -120))
 north = np.squeeze(np.where(dataset["North"] > 720))
 south = np.squeeze(np.where(dataset["North"] < -70))
 
-fig = plt.figure(figsize=(5,5))
+fig = plt.figure(figsize=(8*cm,8*cm))
 ax = fig.add_axes([0.1,0.1,0.8,0.8])
 ax.set_aspect("equal")
 ax.set_xlabel("Easting (km)")
