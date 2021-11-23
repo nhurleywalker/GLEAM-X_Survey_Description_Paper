@@ -5,22 +5,26 @@
 
 from glob import glob
 
+import sys
 import copy
+
+import numpy as np
+from scipy.stats import gaussian_kde
+from astropy.io import fits
+from astropy.modeling import models, fitting
 
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib import rc
-rc('text', usetex=True)
-rc('font',**{'family':'serif','serif':['serif']})
-labelfontsize=12
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "serif",
+    "font.size": 8,
+    "axes.titlesize": 8
+})
 
-from astropy.io import fits
-import numpy as np
-from scipy.stats import gaussian_kde
-from astropy.modeling import models, fitting
-
-import sys
+cm = 1/2.54
 
 def hist_norm_height(n,bins,const):
     ''' Function to normalise bin height by a constant. 
@@ -104,41 +108,43 @@ gmod2.stddev.value = 1.0
 gmod2.mean.value = 0.0
 gmod2.amplitude.value = max(nrs)
 
-fig = plt.figure(figsize=(12, 4))
+# Double-column
+fig = plt.figure(figsize=(19*cm, 6.2*cm))
 # Background-subtracted
 ax1 = fig.add_subplot(131)
-ax1.bar(binsss[:-1], nss, color = 'lightgrey', edgecolor = "none", width=(binsss[1]-binsss[0])) # Histogram
-ax1.plot(np.linspace(-nsig,nsig,100),gmod1(np.linspace(-nsig,nsig,100)), color='k',lw=2, label='BANE')
+ax1.bar(binsss_centers, nss, color = 'lightgrey', edgecolor = "none", width=(binsss[1]-binsss[0])) # Histogram
+ax1.plot(np.linspace(-nsig,nsig,100),gmod1(np.linspace(-nsig,nsig,100)), color='k',lw=1, label='BANE')
 ax1.set_ylim([1.0,1.2*max(nss)])
-ax1.set_title("Background-subtracted S/N image")
+ax1.set_title("Background-subtracted S/N image", fontsize=8)
 # Masked, background-subtracted
 ax2=fig.add_subplot(132)
-ax2.bar(binsms[:-1], nms, color = 'lightgrey', edgecolor = "none", width=(binsms[1]-binsms[0])) # Histogram
-ax2.plot(np.linspace(-nsig,nsig,100),gmod1(np.linspace(-nsig,nsig,100)), color='k',lw=2, label='BANE')
+ax2.bar(binsms_centers, nms, color = 'lightgrey', edgecolor = "none", width=(binsms[1]-binsms[0])) # Histogram
+ax2.plot(np.linspace(-nsig,nsig,100),gmod1(np.linspace(-nsig,nsig,100)), color='k',lw=1, label='BANE')
 ax2.set_ylim([1.0,1.2*max(nms)])
 ax2.set_title("$>5\sigma$ Sources masked; background subtracted")
 # Residuals, background-subtracted
 ax3 = fig.add_subplot(133)
-ax3.bar(binsrs[:-1], nrs, color = 'lightgrey', edgecolor = "none", width=(binsrs[1]-binsrs[0])) # Histogram
-ax3.plot(np.linspace(-nsig,nsig,100),gmod2(np.linspace(-nsig,nsig,100)), color='k',lw=2, label='BANE')
+ax3.bar(binsrs_centers, nrs, color = 'lightgrey', edgecolor = "none", width=(binsrs[1]-binsrs[0])) # Histogram
+ax3.plot(np.linspace(-nsig,nsig,100),gmod2(np.linspace(-nsig,nsig,100)), color='k',lw=1, label='BANE')
 ax3.set_ylim([1.0,1.2*max(nrs)])
 ax3.set_title("$>5\sigma$ Sources and background subtracted")
 
 for ax in ax1, ax2, ax3:
-    ax.axvline(x=0.0, lw=1, color='k', linestyle='-')
-    ax.axvline(x=-1, lw=1, color='k', linestyle='--')
-    ax.axvline(x=-2, lw=1, color='k', linestyle='-.')
-    ax.axvline(x=-5, lw=1, color='k', linestyle=':')
-    ax.axvline(x=1, lw=1, color='k', linestyle='--')
-    ax.axvline(x=2, lw=1, color='k', linestyle='-.')
-    ax.axvline(x=5, lw=1, color='k', linestyle=':')
+    ax.axvline(x=0.0, lw=0.5, color='k', linestyle='-')
+    ax.axvline(x=-1, lw=0.5, color='k', linestyle='--')
+    ax.axvline(x=-2, lw=0.5, color='k', linestyle='-.')
+    ax.axvline(x=-5, lw=0.5, color='k', linestyle=':')
+    ax.axvline(x=1, lw=0.5, color='k', linestyle='--')
+    ax.axvline(x=2, lw=0.5, color='k', linestyle='-.')
+    ax.axvline(x=5, lw=0.5, color='k', linestyle=':')
     ax.set_yscale("log", nonposy='clip')
     ax.set_xlim([-nsig,nsig])
-    ax.tick_params(labelsize=labelfontsize)
-    ax.set_xlabel("$\sigma$",fontsize=labelfontsize)
+#    ax.tick_params(labelsize=labelfontsize)
+    ax.set_xlabel("$\sigma$") #,fontsize=labelfontsize)
 
 fig.tight_layout()
-fig.savefig("noise_distribution.pdf",pad_inches=0.1,bbox_inches="tight")
+fig.savefig("noise_distribution.pdf",bbox_inches="tight")
+#fig.savefig("noise_distribution.png",pad_inches=0.1,bbox_inches="tight")
 
 # What area of sky is this?
 #unnorm_nx, unnorm_binsx = np.histogram(tempd,bins = bins,range=(xmin,xmax))
