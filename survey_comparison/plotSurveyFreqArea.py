@@ -10,6 +10,7 @@ def S(nu, nu0, S0, alpha):
 
 plt.rcParams.update({
     "font.family": "serif",
+    "font.serif": "Times New Roman",
     "font.size": 8}
 )
 
@@ -54,7 +55,7 @@ ax.xaxis.set_major_formatter(FormatStrFormatter('%3.0f'))
 ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: '{:g}'.format(y)))
 ax.legend()
 cb = plt.colorbar(c, cax = cax)
-cb.set_label("Sky area ($\\times1000$ sq.deg.)")
+cb.set_label("Sky area / 1000 sq.deg.")
 # Removes weird striping in colorbar
 # https://stackoverflow.com/questions/15003353/why-does-my-colorbar-have-lines-in-it
 cb.solids.set_edgecolor("face")
