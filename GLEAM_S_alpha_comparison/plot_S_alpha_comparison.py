@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
+import matplotlib.cm as cmap
 from matplotlib.ticker import FuncFormatter
 from astropy.io import fits
 from astropy.coordinates import SkyCoord
@@ -8,24 +8,33 @@ from astropy import units as u
 import numpy as np
 from scipy.stats import gaussian_kde
 
+cm = 1/2.54
+
 def S(nu, nu0, S0, alpha):
    return S0 * (nu/nu0)**alpha
 
 plt.rcParams.update({
     "text.usetex": True,
     "font.family": "serif",
-    "font.size": 10}
+    "font.size": 8}
 )
 
 # May need to adjust that last digit
-viridis = cm.get_cmap('viridis', 1000)
+viridis = cmap.get_cmap('viridis', 1000)
 
 hdu_gx = fits.open("../alpha_distribution/IDR_v1.1_joined_rescaled_cat_seds_subset.fits")
 gx = hdu_gx[1].data
-gx_srcs = SkyCoord(gx["ref_ra"], gx["ref_dec"], unit = (u.deg, u.deg), frame="fk5")
 
 hdu_gl = fits.open("GLEAM_downselect.fits")
 gl = hdu_gl[1].data
+
+ind = np.where(np.logical_not(np.isnan(gx["sp_alpha"])))
+gx = gx[ind]
+
+ind = np.where(np.logical_not(np.isnan(gl["alpha"])))
+gl = gl[ind]
+
+gx_srcs = SkyCoord(gx["ref_ra"], gx["ref_dec"], unit = (u.deg, u.deg), frame="fk5")
 gl_srcs = SkyCoord(gl["RAJ2000"], gl["DEJ2000"], unit = (u.deg, u.deg), frame="fk5")
 
 # Match the sources within 15"
@@ -37,7 +46,7 @@ gxm = gx[sep_constraint]
 glm = gl[idx[sep_constraint]]
 
 
-makeS = False
+makeS = True
 # It takes four minutes to generate this plot because of the error bar loop, so make it optional
 if makeS is True:
     xmin = 0.02
@@ -45,7 +54,7 @@ if makeS is True:
     # Dummy x for f(x)
     x = np.arange(xmin, xmax+10)
 
-    fig = plt.figure(figsize=(5,5))
+    fig = plt.figure(figsize=(8*cm,8*cm))
     ax = fig.add_axes([0.1,0.1,0.8,0.8])
     ax.set_aspect("equal")
     ax.set_xlabel("GLEAM $S_\mathrm{200MHz,fitted}$ / Jy")
@@ -84,11 +93,11 @@ if makeAlpha is True:
     # Dummy alpha
     x = np.arange(xmin, xmax+0.1)
 
-    fig = plt.figure(figsize=(5,5))
+    fig = plt.figure(figsize=(8*cm,8*cm))
     ax = fig.add_axes([0.1,0.1,0.8,0.8])
     ax.set_aspect("equal")
-    ax.set_xlabel("GLEAM $\alpha_\mathrm{fitted}$")
-    ax.set_ylabel("GLEAM-X $\alpha_\mathrm{fitted}$")
+    ax.set_xlabel("GLEAM $\\alpha_\mathrm{fitted}$")
+    ax.set_ylabel("GLEAM-X $\\alpha_\mathrm{fitted}$")
     ax.set_xlim([xmin, xmax])
     ax.set_ylim([xmin, xmax])
     ax.plot(x, x, zorder = 20, color="k", lw=0.5, ls="-")
@@ -98,7 +107,7 @@ if makeAlpha is True:
     xerr = glm["err_alpha"]
     yerr = gxm["sp_alpha_err"]
 
-    xy = np.log10(np.vstack([x,y]))
+    xy = np.vstack([x,y])
     z = gaussian_kde(xy)(xy)
     # Normalise
     z = z / np.max(z)
