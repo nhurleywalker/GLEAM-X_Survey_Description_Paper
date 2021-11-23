@@ -4,15 +4,17 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 import numpy as np
 from astropy.table import Table 
-from matplotlib import cm
+#from matplotlib import cmap
 from matplotlib.colors import Normalize 
 from scipy.interpolate import interpn
 
 plt.rcParams.update({
     "text.usetex": True,
     "font.family": "serif",
-    "font.size": 10}
+    "font.size": 8}
 )
+
+cm = 1/2.54
 
 def density_scatter( x , y, ax = None, sort = True, bins = 20, **kwargs )   :
     """
@@ -31,7 +33,7 @@ def density_scatter( x , y, ax = None, sort = True, bins = 20, **kwargs )   :
         idx = z.argsort()
         x, y, z = x[idx], y[idx], z[idx]
 
-    ax.scatter( x, y, c=z, **kwargs )
+    ax.scatter( x, y, c=z, **kwargs , s=1)
 
     
     return ax
@@ -49,6 +51,7 @@ def weighted_plot(x, y, weight, ax, *args, **kwargs):
         x,
         y,
         marker='.',
+        s=1,
         c=SNR,
         cmap='Greys'
     )
@@ -82,7 +85,7 @@ def make_plot(comp_path, coeffs_path, out_path=None, nsrcs=None):
     for i in range(0, poly_order + 1):
         dec_corr += coeffs[i] * pow(dec_range, poly_order - i)
 
-    fig, ax1 = plt.subplots(1,1,figsize=(4,4))
+    fig, ax1 = plt.subplots(1,1,figsize=(8.5*cm,8.5*cm))
 
     divider = make_axes_locatable(ax1)
     axt = divider.append_axes('top', size='100%', pad=0)
@@ -100,7 +103,7 @@ def make_plot(comp_path, coeffs_path, out_path=None, nsrcs=None):
         dec_range,
         dec_corr,
         ls='-',
-        lw=2
+        lw=1
     )
     axt.xaxis.set_ticklabels([])
 
@@ -128,13 +131,13 @@ def make_plot(comp_path, coeffs_path, out_path=None, nsrcs=None):
         ylim=[ratio_min, ratio_max],
         ylabel='$\log_{10} R$ (corrected)'
     )
-    ax1.grid(axis='both')
+    ax1.grid(axis='both', alpha=0.5)
     axt.set(
         xlim=[dec_min, dec_max],
         ylim=[ratio_min, ratio_max],
         ylabel='$\log_{10} R$ (uncorrected)'
     )
-    axt.grid(axis='both')
+    axt.grid(axis='both', alpha=0.5)
 
     axr.set(
         xlabel='Counts'
@@ -149,7 +152,7 @@ def make_plot(comp_path, coeffs_path, out_path=None, nsrcs=None):
     if out_path is None:
         plt.show()
     else:
-        fig.savefig(out_path)
+        fig.savefig(out_path, bbox_inches="tight")
 
 
 if __name__ == '__main__':
