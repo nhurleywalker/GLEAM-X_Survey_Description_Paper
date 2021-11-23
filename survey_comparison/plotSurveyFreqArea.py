@@ -10,7 +10,7 @@ def S(nu, nu0, S0, alpha):
 
 plt.rcParams.update({
     "font.family": "serif",
-    "font.serif": "Times New Roman",
+    "font.serif": "CMU Serif",
     "font.size": 8}
 )
 
