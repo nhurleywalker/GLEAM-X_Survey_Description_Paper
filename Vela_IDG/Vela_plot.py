@@ -1,12 +1,5 @@
 #!/usr/bin/python
 
-import numpy
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-from matplotlib import rc
-rc('text', usetex=True)
-rc('font',**{'family':'serif','serif':['serif']})
-
 #tables and votables
 from astropy.io.votable import parse_single_table
 from astropy.nddata import Cutout2D
@@ -15,6 +8,20 @@ from astropy import wcs
 from astropy.coordinates import SkyCoord
 from astropy import units as u
 
+import numpy
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+from matplotlib import rc
+
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "serif",
+    "font.size": 8}
+)
+
+cm = 1/2.54
+
+# Not used at the moment
 mwa_bmaj=0.0208 # degrees
 mwa_bmin=0.0165 # degrees
 mwa_bpa=-31.88 # degrees
@@ -36,8 +43,9 @@ cmap="cubehelix"
 #ax_gleam = fig.add_axes([0.025,0.1,0.525,0.85], projection = cutout_gleam.wcs)
 #cax_gleam = fig.add_axes([0.515, 0.1, 0.015, 0.85])
 #cb_gleam = plt.colorbar(im_gleam, cax = cax_gleam)
-# Set up the giant wrapper fits figure
-fig = plt.figure(figsize=(15,5))
+
+# Figure spans whole page
+fig = plt.figure(figsize=(19*cm,8*cm))
 
 # Left panel: GLEAM
 hdu_gleam = fits.open(gleam)
