@@ -17,7 +17,7 @@ from matplotlib.ticker import FuncFormatter
 plt.rcParams.update({
     "text.usetex": True,
     "font.family": "serif",
-    "font.size": 10}
+    "font.size": 8}
 )
 #    "font.sans-serif": ["Helvetica"]}
 # Good for making a png for talks
@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler())
 
+cm = 1/2.54
 
 def inspect_astrometry(gleam_sky, ref_sky, plot_output=None, info=None):
     info = {} if info is None else info
@@ -72,7 +73,7 @@ def inspect_astrometry(gleam_sky, ref_sky, plot_output=None, info=None):
         x = x[mask]
         y = y[mask]
         
-        fig, ax2 = plt.subplots(1,1, figsize=(6,6))
+        fig, ax2 = plt.subplots(1,1, figsize=(8*cm,8*cm))
 
         xy = np.vstack([x, y])
 
@@ -126,7 +127,7 @@ def inspect_astrometry(gleam_sky, ref_sky, plot_output=None, info=None):
         )
         
         fig.tight_layout()
-        fig.savefig(f"{plot_output}")
+        fig.savefig(f"{plot_output}", bbox_inches="tight")
         
     return info
 
