@@ -18,6 +18,8 @@ plt.rcParams.update({
     "font.family": "serif",
     "font.size": 8})
 
+cm = 1/2.54
+
 from astropy.io import fits
 from astropy import wcs
 #from astropy.table import Table, Column
@@ -46,8 +48,8 @@ hdus = [fits.open(ff) for ff in fits_files]
 ras = ["05:30", "08:30", "11:30"]
 #ras = ["10:45", "06:15"]
 
-# In inches, leaving enough in a sideways figure for a caption
-fig = plt.figure(figsize=(7,11))
+# Two-column portrait figure, whole page
+fig = plt.figure(figsize=(19*cm,27*cm))
 
 # Top plot first, work our way down
 # Start at bottom, work your way up
