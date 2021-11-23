@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
+#import matplotlib.cm as cmap
 import pandas as pd
 import numpy as np
 from matplotlib.ticker import FuncFormatter
@@ -9,10 +9,12 @@ def S(nu, nu0, S0, alpha):
    return S0 * (nu/nu0)**alpha
 
 plt.rcParams.update({
-    "text.usetex": True,
     "font.family": "serif",
-    "font.size": 12}
+    "font.size": 8}
 )
+
+# "text.usetex": True,
+cm = 1/2.54
 
 #plt.rcParams["patch.force_edgecolor"] = True
 #plt.rcParams['grid.linewidth'] = 0.1
@@ -26,7 +28,7 @@ dataset = pd.read_csv("RadioContinuumSurveys_downselected.csv", delimiter=",", h
 
 nu = np.arange(1,1e4)
 
-fig = plt.figure(figsize=(5,5))
+fig = plt.figure(figsize=(8*cm,8*cm))
 ax = fig.add_axes([0.1,0.1,0.8,0.8])
 cax = fig.add_axes([0.91,0.1,0.02,0.8])
 ax.set_xscale("log")
@@ -36,8 +38,11 @@ ax.set_ylabel("RMS noise / mJy beam$^{-1}$")
 c = ax.scatter(dataset["mean_freq"], dataset["S-min"]/5, s = 50*np.sqrt(dataset["resolution"]), c = dataset["area"]/1000, cmap="cool", alpha=0.7, zorder = 10)
 for i, txt in enumerate(dataset["Name"]):
     if txt == "GLEAM-X":
-        txt = "\\textbf{GLEAM-X}"
-    ax.annotate(txt, (0.7*dataset["mean_freq"][i], 1.2*dataset["S-min"][i]/5), zorder = 100)
+#        txt = "\\textbf{GLEAM-X}"
+        fontweight = "bold"
+    else:
+        fontweight = "normal"
+    ax.annotate(txt, (0.7*dataset["mean_freq"][i], 1.2*dataset["S-min"][i]/5), zorder = 100, fontsize=6, fontfamily="sans-serif", fontweight = fontweight)
 ax.errorbar(dataset["mean_freq"], dataset["S-min"]/5, xerr = dataset["bandwidth"]/2, fmt="", color="k", linestyle="", lw=0.5)
 ax.plot(nu, S(nu, 200., 1., -0.7), lw = 0.5, color="grey", label="$\\alpha=-0.7$", zorder = 1)
 ax.plot(nu, S(nu, 200., 1., -2.5), lw = 0.5, color="grey", ls="--", label="$\\alpha=-2.5$", zorder = 1)
@@ -53,7 +58,7 @@ cb.set_label("Sky area ($\\times1000$ sq.deg.)")
 # Removes weird striping in colorbar
 # https://stackoverflow.com/questions/15003353/why-does-my-colorbar-have-lines-in-it
 cb.solids.set_edgecolor("face")
-fig.savefig("Surveys.png", bbox_inches="tight")
+#fig.savefig("Surveys.png", bbox_inches="tight")
 fig.savefig("Surveys.pdf", bbox_inches="tight")
 
 
