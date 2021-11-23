@@ -18,8 +18,9 @@ plt.rcParams.update({
     "font.family": "serif",
     "font.size": 8})
 
-LIMITS = [SkyCoord(i, unit=(u.hourangle, u.deg), frame='icrs') for i in ['13:00:00 -20:42:00','04:00:00 -32:42:00']]
+cm = 1/2.54
 
+LIMITS = [SkyCoord(i, unit=(u.hourangle, u.deg), frame='icrs') for i in ['13:00:00 -20:42:00','04:00:00 -32:42:00']]
 
 def make_curve_plot(stats, flux_levels, base_out):
     curve = interp1d(
@@ -27,7 +28,7 @@ def make_curve_plot(stats, flux_levels, base_out):
                 flux_levels,
     )
 
-    fig, ax = plt.subplots(1,1, figsize=(3.5,3))
+    fig, ax = plt.subplots(1,1, figsize=(8*cm,6.8*cm))
 
     ax.errorbar(
         flux_levels,
@@ -97,7 +98,7 @@ def make_spatial_plot(comp_cube, flux_levels, w, base_out, cmap='inferno'):
 #    for loc in (ax1_loc, ax2_loc, ax3_loc): #ax4_loc
 #        print(loc)
 
-    fig = plt.figure(figsize=(7, 3))
+    fig = plt.figure(figsize=(17*cm, 7.3*cm))
 
     cax = fig.add_axes([0.865, 0.1, 0.0085, offset_y(2) + delta_y])
     ax1 = fig.add_axes(ax1_loc, projection=w)
