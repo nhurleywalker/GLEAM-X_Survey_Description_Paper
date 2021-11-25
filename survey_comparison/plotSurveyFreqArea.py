@@ -14,18 +14,11 @@ plt.rcParams.update({
     "font.size": 8}
 )
 
+# I don't like the way the survey labels look in CMU
 # "text.usetex": True,
 cm = 1/2.54
 
-#plt.rcParams["patch.force_edgecolor"] = True
-#plt.rcParams['grid.linewidth'] = 0.1
-#plt.rcParams['axes.axisbelow'] = True
-
 dataset = pd.read_csv("RadioContinuumSurveys_downselected.csv", delimiter=",", header=0, comment="#")
-#dataset = np.loadtxt("RadioContinuumSurveys_downselected.csv", delimieter=",")
-#dataset = dataset.values
-
-# plt.xkcd()
 
 nu = np.arange(1,1e4)
 
@@ -36,7 +29,10 @@ ax.set_xscale("log")
 ax.set_yscale("log")
 ax.set_xlabel("Central frequency / MHz")
 ax.set_ylabel("RMS noise / mJy beam$^{-1}$")
-c = ax.scatter(dataset["mean_freq"], dataset["S-min"]/5, s = 50*np.sqrt(dataset["resolution"]), c = dataset["area"]/1000, cmap="cool", alpha=0.7, zorder = 10)
+# Data
+#c = ax.scatter(dataset["mean_freq"], dataset["S-min"]/5, s = 50*np.sqrt(dataset["resolution"]), c = dataset["area"]/1000, cmap="cool", alpha=0.7, zorder = 10)
+c = ax.scatter(dataset["mean_freq"], dataset["S-min"]/5, s = 10*dataset["resolution"], c = dataset["area"]/1000, cmap="cool", alpha=0.7, zorder = 10)
+# Labels
 for i, txt in enumerate(dataset["Name"]):
     if txt == "GLEAM-X":
 #        txt = "\\textbf{GLEAM-X}"
@@ -44,9 +40,24 @@ for i, txt in enumerate(dataset["Name"]):
     else:
         fontweight = "normal"
     ax.annotate(txt, (0.7*dataset["mean_freq"][i], 1.2*dataset["S-min"][i]/5), zorder = 100, fontsize=6, fontfamily="sans-serif", fontweight = fontweight)
+# Bandwidths
 ax.errorbar(dataset["mean_freq"], dataset["S-min"]/5, xerr = dataset["bandwidth"]/2, fmt="", color="k", linestyle="", lw=0.5)
+# Spectral indices
 ax.plot(nu, S(nu, 200., 1., -0.7), lw = 0.5, color="grey", label="$\\alpha=-0.7$", zorder = 1)
 ax.plot(nu, S(nu, 200., 1., -2.5), lw = 0.5, color="grey", ls="--", label="$\\alpha=-2.5$", zorder = 1)
+
+# Survey resolution legend
+locs = [20., 40., 100.]
+resolutions = [6, 15., 60.] #arcsec
+etxt = ["$6''$", "$15''$", "$1'$"]
+#etxt = ["6\"", "45\"", "2\'"]
+ay = 0.01
+arby = ay*np.ones(len(locs))
+ax.scatter(locs, arby, s = 10*np.array(resolutions), color="gray", alpha=0.5)
+for i, txt in enumerate(etxt):
+    ax.annotate(txt, (locs[i], ay), fontsize=6, ha="center", va="center")
+
+
 ax.set_ylim(1.e-3, 2e2)
 ax.set_xlim(10., 7e3)
 # I prefer "100, 1000" to "10^2, 10^3"
