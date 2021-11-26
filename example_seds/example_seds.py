@@ -16,7 +16,7 @@ TOPCSV='GLEAM-X J065228.65-255000.34.csv'
 
 markers = {
     'gleamx':{'marker':'.', 'color':'black', 'label':'GLEAM-X', 'markeredgewidth':0.1, 'elinewidth':0.5},
-    'sumss':{'marker':'s', 'color':'green', 'label':'SUMSS'},
+    'sumss':{'marker':'s', 'color':'green', 'label':'SUMSS', 'markersize':2},
     'nvss':{'marker':'+', 'color':'red', 'label':'NVSS'}
 
 }
@@ -44,6 +44,16 @@ def curved_law(nu, s_nu, alpha, q):
 def fn_to_tex(fn):
     # because I am a bad person
     return fn.replace('.csv','').replace('-','--')
+
+
+def overlay_box(ax, text, x=0.02, y=0.125):
+    ax.text(
+        x, 
+        y,
+        text, 
+        transform=ax.transAxes,
+        bbox=dict(facecolor='white', alpha=0.8, edgecolor='black', boxstyle='round,pad=0.25')
+    )
 
 def make_ax1(ax1, nu, csv=None):
     if csv is None:
@@ -129,12 +139,17 @@ def make_ax1(ax1, nu, csv=None):
         yscale='log',
         xlabel='Frequency (MHz)',
         ylabel='Flux density (mJy)',
-        title=title
     )
     ax1.xaxis.set_major_formatter(FormatStrFormatter('%3.0f'))
     ax1.yaxis.set_major_formatter(FormatStrFormatter('%3.0f'))
     ax1.yaxis.set_minor_formatter(FormatStrFormatter('%3.0f'))
 #    ax1.xaxis.set_minor_formatter(FormatStrFormatter('%3.0f'))
+
+    overlay_box(
+        ax1,
+        f"{title}\nDouble Power Law",
+        y=0.1
+    )
 
 def make_small_ax(ax, nu, xlabel=None, onright=False, csv=None, model=None):
     
@@ -143,7 +158,9 @@ def make_small_ax(ax, nu, xlabel=None, onright=False, csv=None, model=None):
             nu,
             pl(nu, 100., -0.8),
         )
+        title = None
     else:
+        title = fn_to_tex(csv)
         scale = 1000
         df = pd.read_csv(csv)
         ax.errorbar(
@@ -166,9 +183,10 @@ def make_small_ax(ax, nu, xlabel=None, onright=False, csv=None, model=None):
     
     if model is not None:
         if model == 'pl':
-            model = (pl, (np.median(df.flux), -0.7))
+            model = (pl, (np.median(df.flux), -0.7), 
+            'Power Law')
         elif model == 'cpl':
-            model = (curved_law, (np.median(df.flux), -0.7, 0))
+            model = (curved_law, (np.median(df.flux), -0.7, 0), 'Curved Power Law')
         else:
             print(f"{model} is not currently supported")
 
@@ -210,6 +228,15 @@ def make_small_ax(ax, nu, xlabel=None, onright=False, csv=None, model=None):
     if onright:
         ax.yaxis.tick_right()
         ax.yaxis.set_label_position('right')
+
+    
+    if title is not None:
+        overlay_box(
+            ax,
+            f"{title}\n{model[2]}",
+            y=0.07,
+            x=0.31 if onright is False else 0.02
+        )
 
     if xlabel is None:
         print('--Setting to None')
