@@ -16,7 +16,7 @@ TOPCSV='GLEAM-X J065228.65-255000.34.csv'
 
 markers = {
     'gleamx':{'marker':'.', 'color':'black', 'label':'GLEAM-X', 'markeredgewidth':0.1, 'elinewidth':0.5},
-    'sumss':{'marker':'s', 'color':'green', 'label':'SUMSS'},
+    'sumss':{'marker':'s', 'color':'green', 'label':'SUMSS', 'markersize':2},
     'nvss':{'marker':'+', 'color':'red', 'label':'NVSS'}
 
 }
@@ -44,6 +44,16 @@ def curved_law(nu, s_nu, alpha, q):
 def fn_to_tex(fn):
     # because I am a bad person
     return fn.replace('.csv','').replace('-','--')
+
+
+def overlay_box(ax, text, x=0.02, y=0.125):
+    ax.text(
+        x, 
+        y,
+        text, 
+        transform=ax.transAxes,
+        bbox=dict(facecolor='white', alpha=0.8, edgecolor='black', boxstyle='round,pad=0.25')
+    )
 
 def make_ax1(ax1, nu, csv=None):
     if csv is None:
@@ -129,12 +139,17 @@ def make_ax1(ax1, nu, csv=None):
         yscale='log',
         xlabel='Frequency (MHz)',
         ylabel='Flux density (mJy)',
-        title=title
     )
     ax1.xaxis.set_major_formatter(FormatStrFormatter('%3.0f'))
     ax1.yaxis.set_major_formatter(FormatStrFormatter('%3.0f'))
     ax1.yaxis.set_minor_formatter(FormatStrFormatter('%3.0f'))
 #    ax1.xaxis.set_minor_formatter(FormatStrFormatter('%3.0f'))
+
+    overlay_box(
+        ax1,
+        f"{title}\nDouble Power Law",
+        y=0.1
+    )
 
 def make_small_ax(ax, nu, xlabel=None, onright=False, csv=None, model=None):
     
@@ -143,7 +158,9 @@ def make_small_ax(ax, nu, xlabel=None, onright=False, csv=None, model=None):
             nu,
             pl(nu, 100., -0.8),
         )
+        title = None
     else:
+        title = fn_to_tex(csv)
         scale = 1000
         df = pd.read_csv(csv)
         ax.errorbar(
@@ -166,9 +183,10 @@ def make_small_ax(ax, nu, xlabel=None, onright=False, csv=None, model=None):
     
     if model is not None:
         if model == 'pl':
-            model = (pl, (np.median(df.flux), -0.7))
+            model = (pl, (np.median(df.flux), -0.7), 
+            'Power Law')
         elif model == 'cpl':
-            model = (curved_law, (np.median(df.flux), -0.7, 0))
+            model = (curved_law, (np.median(df.flux), -0.7, 0), 'Curved Power Law')
         else:
             print(f"{model} is not currently supported")
 
@@ -211,6 +229,15 @@ def make_small_ax(ax, nu, xlabel=None, onright=False, csv=None, model=None):
         ax.yaxis.tick_right()
         ax.yaxis.set_label_position('right')
 
+    
+    if title is not None:
+        overlay_box(
+            ax,
+            f"{title}\n{model[2]}",
+            y=0.07,
+            x=0.31 if onright is False else 0.02
+        )
+
     if xlabel is None:
         print('--Setting to None')
         ax.set_xticklabels([])
@@ -223,36 +250,52 @@ def make_small_ax(ax, nu, xlabel=None, onright=False, csv=None, model=None):
     ax.yaxis.set_minor_formatter(FormatStrFormatter('%3.0f'))
 
 
-example_nu_large = np.geomspace(65, 2000, 200)
-example_nu = np.geomspace(65, 270, 200)
 
-ax1_loc = (0.1, 0.6, 0.8, 0.35)
-ax2_loc = (0.1, 0.315, 0.395, 0.2)
-ax3_loc = (0.505, 0.315, 0.395, 0.2)
-ax4_loc = (0.1, 0.075, 0.395, 0.23)
-ax5_loc = (0.505, 0.075, 0.395, 0.23)
+def make_sed_figure(output='test.png'):
+
+    example_nu_large = np.geomspace(65, 2000, 200)
+    example_nu = np.geomspace(65, 270, 200)
+
+    ax1_loc = (0.1, 0.6, 0.8, 0.35)
+    ax2_loc = (0.1, 0.315, 0.395, 0.2)
+    ax3_loc = (0.505, 0.315, 0.395, 0.2)
+    ax4_loc = (0.1, 0.075, 0.395, 0.23)
+    ax5_loc = (0.505, 0.075, 0.395, 0.23)
 
 
-fig = plt.figure(figsize=(17*cm, 15*cm))
+    fig = plt.figure(figsize=(17*cm, 15*cm))
 
-ax1 = fig.add_axes(ax1_loc)
-make_ax1(ax1, example_nu_large, csv=TOPCSV)
+    ax1 = fig.add_axes(ax1_loc)
+    make_ax1(ax1, example_nu_large, csv=TOPCSV)
 
-ax2 = fig.add_axes(ax2_loc)
-ax3 = fig.add_axes(ax3_loc)
-ax4 = fig.add_axes(ax4_loc)#, sharex=ax2)
-ax5 = fig.add_axes(ax5_loc)#, sharex=ax3)
+    ax2 = fig.add_axes(ax2_loc)
+    ax3 = fig.add_axes(ax3_loc)
+    ax4 = fig.add_axes(ax4_loc)#, sharex=ax2)
+    ax5 = fig.add_axes(ax5_loc)#, sharex=ax3)
 
-print('Top Left')
-make_small_ax(ax2, example_nu, csv='GLEAM-X J075203.35-211015.30.csv', model='cpl')
+    print('Top Left')
+    make_small_ax(ax2, example_nu, csv='GLEAM-X J075203.35-211015.30.csv', model='cpl')
 
-print('Top Right')
-make_small_ax(ax3, example_nu, onright=True, csv='GLEAM-X J050107.00-304737.32.csv', model='pl')
+    print('Top Right')
+    make_small_ax(ax3, example_nu, onright=True, csv='GLEAM-X J050107.00-304737.32.csv', model='pl')
 
-print('Bottom Left')
-make_small_ax(ax4, example_nu, xlabel='Frequency (MHz)', csv='GLEAM-X J134551.54-301504.30.csv', model='pl')
+    print('Bottom Left')
+    make_small_ax(ax4, example_nu, xlabel='Frequency (MHz)', csv='GLEAM-X J134551.54-301504.30.csv', model='pl')
 
-print('Bottom Right')
-make_small_ax(ax5, example_nu, xlabel='Frequency (MHz)', onright=True, csv='GLEAM-X J052952.39-242742.42.csv', model='cpl')
+    print('Bottom Right')
+    make_small_ax(ax5, example_nu, xlabel='Frequency (MHz)', onright=True, csv='GLEAM-X J052952.39-242742.42.csv', model='cpl')
 
-fig.savefig('test.png')
+    fig.savefig(output)
+
+if __name__ == '__main__':
+    from argparse import ArgumentParser
+    parser = ArgumentParser(description='Make some nice SED figure')
+
+    parser.add_argument('-o','--output', type=str, default='test.png', help='Name of the output file')
+
+    args = parser.parse_args()
+
+    make_sed_figure(
+        output=args.output
+    )
+
