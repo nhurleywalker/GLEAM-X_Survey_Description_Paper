@@ -126,12 +126,12 @@ def make_ax1(ax1, nu, csv=None):
         xscale='log',
         yscale='log',
         xlabel='Frequency (MHz)',
-        ylabel='Flux density (Jy)',
+        ylabel='Flux density (mJy)',
         title=title
     )
     ax1.xaxis.set_major_formatter(FormatStrFormatter('%3.0f'))
     ax1.yaxis.set_major_formatter(FormatStrFormatter('%3.0f'))
-    ax1.yaxis.set_minor_formatter(FormatStrFormatter('%3.1f'))
+    ax1.yaxis.set_minor_formatter(FormatStrFormatter('%3.0f'))
 #    ax1.xaxis.set_minor_formatter(FormatStrFormatter('%3.0f'))
 
 def make_small_ax(ax, nu, xlabel=None, onright=False, csv=None, model=None):
