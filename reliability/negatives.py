@@ -102,15 +102,14 @@ closeid=closeid.astype(int)
 peak_flux_bright=cat_full['peak_flux'][brightid]
 drange=abs(peak_flux_bright/cat_neg['peak_flux'])
 
-## SET CRITERIA OF WITHIN 10 ARCMIN, PEAK FLUX OF POSITIVE >= 0.1 JY AND ABS(FLUX RATION) >= 30
-#criteria1=np.argwhere((sep_bright<=10)&(drange>=30)&(peak_flux_bright>=0.1))[:,0]
-#criteria2=np.argwhere(sep_close<=2)[:,0]
+## SET CRITERIA 
 
-criteria1=np.argwhere((sep_bright<=13)&(drange>=250)&(peak_flux_bright>=1))[:,0]
+criteria1=np.argwhere((sep_bright<=5)&(drange>=350)&(peak_flux_bright>=2.))[:,0]
+criteria2=np.argwhere((sep_bright<=12)&(sep_bright>5)&(drange>=650)&(peak_flux_bright>=6.))[:,0]
 
 flag=np.zeros(nneg)
 flag[criteria1]=1
-#flag[criteria2]=1
+flag[criteria2]=1
 
 good=np.argwhere(flag==0)[:,0]
 
@@ -139,10 +138,7 @@ peak_flux_bright_pos=cat_full['peak_flux'][brightid_pos]
 drange_pos=abs(peak_flux_bright_pos/cat_full['peak_flux'])
 
 
-
-#criteria1_pos=np.argwhere((sep_bright_pos<=10)&(drange_pos>=350)&(peak_flux_bright_pos>=2.))[:,0]
-
-criteria1_pos=np.argwhere((sep_bright_pos<=4)&(drange_pos>=350)&(peak_flux_bright_pos>=2.))[:,0]
+criteria1_pos=np.argwhere((sep_bright_pos<=5)&(drange_pos>=350)&(peak_flux_bright_pos>=2.))[:,0]
 criteria2_pos=np.argwhere((sep_bright_pos<=12)&(sep_bright_pos>5)&(drange_pos>=650)&(peak_flux_bright_pos>=6.))[:,0]
 
 
@@ -160,7 +156,7 @@ print>>outf1,'fk5'
 
 
 for i in range(good.size):
-    print >> outf1,'point('+str(cat_neg['ra'][good[i]])+','+str(cat_neg['dec'][good[i]])+') # point=X color=green'
+    print >> outf1,'point('+str(cat_neg['ra'][good[i]])+','+str(cat_neg['dec'][good[i]])+') # point=X color=magenta'
 
 outf1.close()
 
@@ -187,13 +183,8 @@ for i in range(good_pos.size):
 
 outf1.close()
 
-###CALCULATE GAUSSIAN DIST AND MAKE SOME PLOTS
+### MAKE SOME PLOTS
 
-x_full= np.linspace(-8, 8, 1501)
-x_full1= (x_full[1:]+x_full[:-1])/2.
-area=x_full[1]-x_full[0]
-gauss1=exp((-1.)*(x_full1**2)/(2*(1.**2)))
-gauss11=(gauss1*area/(np.pi*2)**.5)
 
 
 fig1=pyl.figure(1,figsize=(9,9))
@@ -201,8 +192,6 @@ ax1=pyl.subplot(111)
 ax1.tick_params(labelsize=13)
 hxy=pyl.hist(cat_neg['int_flux']/cat_neg['local_rms'],bins=30,alpha=.5,color='blue',label='No Filtering')
 hxy2=pyl.hist(cat_neg['int_flux'][good]/cat_neg['local_rms'][good],bins=hxy[1],alpha=0.8,color='r',label='Filtered')
-
-#pyl.plot(x_full1,(gauss11)*(nsamps),'k-',label=r'Noise Gaussian' )
 pyl.axis([-10,-4,0.,70.])
 pyl.legend(loc=2,prop={'size':13})
 
