@@ -1,5 +1,3 @@
-import os
-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,12 +10,14 @@ plt.rcParams.update({
     "font.family": "serif",
     "font.size": 8})
 
+cm = 1/2.54
+
 TOPCSV='GLEAM-X J065228.65-255000.34.csv'
 
 markers = {
-    'gleamx':{'marker':'.', 'color':'red', 'label':'GLEAM-X'},
+    'gleamx':{'marker':'.', 'color':'black', 'label':'GLEAM-X', 'markeredgewidth':0.1, 'elinewidth':0.5},
     'sumss':{'marker':'s', 'color':'green', 'label':'SUMSS'},
-    'nvss':{'marker':'+', 'color':'blue', 'label':'NVSS'}
+    'nvss':{'marker':'+', 'color':'red', 'label':'NVSS'}
 
 }
 
@@ -50,6 +50,7 @@ def make_ax1(ax1, nu, csv=None):
         ax1.plot(
             nu,
             pl(nu, 100., -0.8),
+            lw=0.5,
         )
         title = 'GLEAM-XJ12345-234565'
     else:
@@ -109,7 +110,8 @@ def make_ax1(ax1, nu, csv=None):
         
         ax1.plot(
             nu,
-            q50
+            q50,
+            lw=0.5,
         )
         ax1.fill_between(
             nu,
@@ -197,7 +199,8 @@ def make_small_ax(ax, nu, xlabel=None, onright=False, csv=None, model=None):
         
         ax.plot(
             nu,
-            q50
+            q50,
+            lw=0.5,
         )
         ax.fill_between(
             nu,
@@ -230,7 +233,7 @@ ax4_loc = (0.1, 0.075, 0.395, 0.23)
 ax5_loc = (0.505, 0.075, 0.395, 0.23)
 
 
-fig = plt.figure(figsize=(7, 5))
+fig = plt.figure(figsize=(17*cm, 15*cm))
 
 ax1 = fig.add_axes(ax1_loc)
 make_ax1(ax1, example_nu_large, csv=TOPCSV)
