@@ -74,14 +74,14 @@ for i in range(6):
     data = data1
     bmaj = np.sqrt(data[i]["radius"][0]**2 - 1)
     beams.append(bmaj)
-    ax1.errorbar(np.sqrt(data[i]["radius"]**2 - bmaj**2), data[i]["flux"]/data[i]["model"], 
-        yerr=data[i]["eflux"]/data[i]["model"], 
-        ls="-", 
-        marker="+",
-        markeredgewidth=0.25,
-        color=colors[i], 
-        lw=0.5,
-        zorder=10+i)
+#    ax1.errorbar(np.sqrt(data[i]["radius"]**2 - bmaj**2), data[i]["flux"]/data[i]["model"], 
+#        yerr=data[i]["eflux"]/data[i]["model"], 
+#        ls="-", 
+#        marker="+",
+#        markeredgewidth=0.25,
+#        color=colors[i], 
+#        lw=0.5,
+#        zorder=10+i)
     ax1.plot(np.sqrt(data[i]["radius"]**2 - bmaj**2), data[i]["aegean"]/data[i]["model"], 
         ls="-.", 
         color=colors[i], 
@@ -92,14 +92,14 @@ for i in range(6):
     data_multi = data_multi1
     bmaj = np.sqrt(data[i]["radius"][0]**2 - 1)
     beams.append(bmaj)
-    ax2.errorbar(np.sqrt(data_multi[i]["radius"]**2 - bmaj**2), data_multi[i]["flux"]/data_multi[i]["model"], 
-        yerr=data_multi[i]["eflux"]/data_multi[i]["model"], 
-        ls="-", 
-        lw=0.5,
-        marker="+",
-        markeredgewidth=0.25,
-        color=colors[i], 
-        zorder=10+i)
+#    ax2.errorbar(np.sqrt(data_multi[i]["radius"]**2 - bmaj**2), data_multi[i]["flux"]/data_multi[i]["model"], 
+#        yerr=data_multi[i]["eflux"]/data_multi[i]["model"], 
+#        ls="-", 
+#        lw=0.5,
+#        marker="+",
+#        markeredgewidth=0.25,
+#        color=colors[i], 
+#        zorder=10+i)
     ax2.plot(np.sqrt(data_multi[i]["radius"]**2 - bmaj**2), data_multi[i]["aegean"]/data_multi[i]["model"], 
         ls="-.", 
         lw=0.5,
@@ -110,14 +110,14 @@ for i in range(6):
     data = data2
     bmaj = np.sqrt(data[i]["radius"][0]**2 - 1)
     beams.append(bmaj)
-    ax3.errorbar(np.sqrt(data[i]["radius"]**2 - bmaj**2), data[i]["flux"]/data[i]["model"], 
-        yerr=data[i]["eflux"]/data[i]["model"], 
-        ls="-", 
-        lw=0.5,
-        marker="+",
-        markeredgewidth=0.25,
-        color=colors[i], 
-        zorder=10+i)
+#    ax3.errorbar(np.sqrt(data[i]["radius"]**2 - bmaj**2), data[i]["flux"]/data[i]["model"], 
+#        yerr=data[i]["eflux"]/data[i]["model"], 
+#        ls="-", 
+#        lw=0.5,
+#        marker="+",
+#        markeredgewidth=0.25,
+#        color=colors[i], 
+#        zorder=10+i)
     ax3.plot(np.sqrt(data[i]["radius"]**2 - bmaj**2), data[i]["aegean"]/data[i]["model"], 
         ls="-.", 
         lw=0.5,
@@ -128,14 +128,14 @@ for i in range(6):
     data_multi = data_multi2
     bmaj = np.sqrt(data[i]["radius"][0]**2 - 1)
     beams.append(bmaj)
-    ax4.errorbar(np.sqrt(data_multi[i]["radius"]**2 - bmaj**2), data_multi[i]["flux"]/data_multi[i]["model"], 
-        yerr=data_multi[i]["eflux"]/data_multi[i]["model"], 
-        ls="-", 
-        lw=0.5,
-        marker="+",
-        markeredgewidth=0.25,
-        color=colors[i], 
-        zorder=10+i)
+#    ax4.errorbar(np.sqrt(data_multi[i]["radius"]**2 - bmaj**2), data_multi[i]["flux"]/data_multi[i]["model"], 
+#        yerr=data_multi[i]["eflux"]/data_multi[i]["model"], 
+#        ls="-", 
+#        lw=0.5,
+#        marker="+",
+#        markeredgewidth=0.25,
+#        color=colors[i], 
+#        zorder=10+i)
     ax4.plot(np.sqrt(data_multi[i]["radius"]**2 - bmaj**2), data_multi[i]["aegean"]/data_multi[i]["model"], 
         ls="-.", 
         lw=0.5,
@@ -150,19 +150,26 @@ for ax in [ax1, ax2, ax3, ax4]:
     for spacing in [0.6, 0.8, 1.0]:
         ax.axhline(spacing, ls="--", lw=1, color="grey")
 
-handles = [Line2D([0], [0], linestyle="-", marker="+", color=colors[0], lw=0.5, markeredgewidth=0.25, label=r"uniform"),
-           Line2D([0], [0], linestyle="-", marker="+",color=colors[1], lw=0.5, markeredgewidth=0.25, label=r"$r=0.0$"),
-           Line2D([0], [0], linestyle="-", marker="+",color=colors[2], lw=0.5, markeredgewidth=0.25, label=r"$r=+0.5$"),
-           Line2D([0], [0], linestyle="-", marker="+",color=colors[3], lw=0.5, markeredgewidth=0.25, label=r"$r=+1.0$"),
-           Line2D([0], [0], linestyle="-", marker="+",color=colors[4], lw=0.5, markeredgewidth=0.25, label=r"$r=+2.0$"),
-           Line2D([0], [0], linestyle="-", marker="+",color=colors[5], lw=0.5, markeredgewidth=0.25, label=r"natural"),
-           Line2D([0], [0], linestyle="-.", color=colors[0], lw=0.5, label=r"\texttt{aegean}, uniform"),
-           Line2D([0], [0], linestyle="-.", color=colors[1], lw=0.5, label=r"\texttt{aegean}, $r=0.0$"),
-           Line2D([0], [0], linestyle="-.", color=colors[2], lw=0.5, label=r"\texttt{aegean}, $r=+0.5$"),
-           Line2D([0], [0], linestyle="-.", color=colors[3], lw=0.5, label=r"\texttt{aegean}, $r=+1.0$"),
-           Line2D([0], [0], linestyle="-.", color=colors[4], lw=0.5, label=r"\texttt{aegean}, $r=+2.0$"),
-           Line2D([0], [0], linestyle="-.", color=colors[5], lw=0.5, label=r"\texttt{aegean}, natural"),]
-ax2.legend(ncol=2, bbox_to_anchor=(0.2,1.6), loc="upper left", fontsize=font_ticks-2.,
+#handles = [Line2D([0], [0], linestyle="-", marker="+", color=colors[0], lw=0.5, markeredgewidth=0.25, label=r"uniform"),
+#           Line2D([0], [0], linestyle="-", marker="+",color=colors[1], lw=0.5, markeredgewidth=0.25, label=r"$r=0.0$"),
+#           Line2D([0], [0], linestyle="-", marker="+",color=colors[2], lw=0.5, markeredgewidth=0.25, label=r"$r=+0.5$"),
+#           Line2D([0], [0], linestyle="-", marker="+",color=colors[3], lw=0.5, markeredgewidth=0.25, label=r"$r=+1.0$"),
+#           Line2D([0], [0], linestyle="-", marker="+",color=colors[4], lw=0.5, markeredgewidth=0.25, label=r"$r=+2.0$"),
+#           Line2D([0], [0], linestyle="-", marker="+",color=colors[5], lw=0.5, markeredgewidth=0.25, label=r"natural"),
+#           Line2D([0], [0], linestyle="-.", color=colors[0], lw=0.5, label=r"\texttt{aegean}, uniform"),
+#           Line2D([0], [0], linestyle="-.", color=colors[1], lw=0.5, label=r"\texttt{aegean}, $r=0.0$"),
+#           Line2D([0], [0], linestyle="-.", color=colors[2], lw=0.5, label=r"\texttt{aegean}, $r=+0.5$"),
+#           Line2D([0], [0], linestyle="-.", color=colors[3], lw=0.5, label=r"\texttt{aegean}, $r=+1.0$"),
+#           Line2D([0], [0], linestyle="-.", color=colors[4], lw=0.5, label=r"\texttt{aegean}, $r=+2.0$"),
+#           Line2D([0], [0], linestyle="-.", color=colors[5], lw=0.5, label=r"\texttt{aegean}, natural"),]
+
+handles = [Line2D([0], [0], linestyle="-.", color=colors[0], lw=0.5, label=r"uniform"),
+           Line2D([0], [0], linestyle="-.", color=colors[1], lw=0.5, label=r"$r=0.0$"),
+           Line2D([0], [0], linestyle="-.", color=colors[2], lw=0.5, label=r"$r=+0.5$"),
+           Line2D([0], [0], linestyle="-.", color=colors[3], lw=0.5, label=r"$r=+1.0$"),
+           Line2D([0], [0], linestyle="-.", color=colors[4], lw=0.5, label=r"$r=+2.0$"),
+           Line2D([0], [0], linestyle="-.", color=colors[5], lw=0.5, label=r"natural")]
+ax2.legend(ncol=2, bbox_to_anchor=(0.4,1.32), loc="upper left", fontsize=font_ticks-2.,
            handles=handles[::-1], handlelength=3., frameon=False)
 
 fig.text(0.04, 0.5, r"$S_\mathrm{measured} / S_\mathrm{model}$ ", fontsize=font_labels, va="center", rotation=90.)
