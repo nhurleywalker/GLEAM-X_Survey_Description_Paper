@@ -148,7 +148,8 @@ def make_ax1(ax1, nu, csv=None):
     overlay_box(
         ax1,
         f"{title}\nDouble Power Law",
-        y=0.1
+        y=0.05,
+        x=0.0155
     )
 
 def make_small_ax(ax, nu, xlabel=None, onright=False, csv=None, model=None):
@@ -235,7 +236,7 @@ def make_small_ax(ax, nu, xlabel=None, onright=False, csv=None, model=None):
             ax,
             f"{title}\n{model[2]}",
             y=0.06,
-            x=0.32 if onright is False else 0.02
+            x=0.315 if onright is False else 0.02
         )
 
     if xlabel is None:
