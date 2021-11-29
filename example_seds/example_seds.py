@@ -234,8 +234,8 @@ def make_small_ax(ax, nu, xlabel=None, onright=False, csv=None, model=None):
         overlay_box(
             ax,
             f"{title}\n{model[2]}",
-            y=0.07,
-            x=0.31 if onright is False else 0.02
+            y=0.06,
+            x=0.32 if onright is False else 0.02
         )
 
     if xlabel is None:
