@@ -137,11 +137,11 @@ def fit_models(row):
 
     # In [35]:  chi2.ppf(0.99, 18) / 18
     # Out[35]: 1.9336280963725037
-    pl_res = None if pl_res['rchi2'] > 1.933 else pl_res
+    pl_res = None if pl_res is None or pl_res['rchi2'] > 1.933 else pl_res
 
     # In [36]:  chi2.ppf(0.99, 17) / 17
     # Out[36]: 1.965215506176742
-    cpl_res = None if cpl_res['rchi2'] > 1.965 else cpl_res
+    cpl_res = None if cpl_res is None or cpl_res['rchi2'] > 1.965 else cpl_res
 
     # If both failed, nothing can be done
     if pl_res is None and cpl_res is None:
