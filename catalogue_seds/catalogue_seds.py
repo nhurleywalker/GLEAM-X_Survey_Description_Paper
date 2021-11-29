@@ -74,7 +74,7 @@ def fit_pl(freq, flux, fluxerr):
     err_p = np.sqrt(np.diag(covar))
     dof = len(freq) - 2
     chi2 = np.sum(
-        (flux - power_law(freq, *best_p))**2 / fluxerr**2
+        ((flux - power_law(freq, *best_p)) / fluxerr)**2
         )
     rchi2 = chi2 / dof
 
@@ -108,7 +108,7 @@ def fit_cpl(freq, flux, fluxerr):
     err_p = np.sqrt(np.diag(covar))
     dof = len(freq) - 3
     chi2 = np.sum(
-        (flux - curved_power_law(freq, *best_p))**2 / fluxerr**2
+        ((flux - curved_power_law(freq, *best_p)) / fluxerr)**2
         )
     rchi2 = chi2 / dof
     return dict(
@@ -149,6 +149,7 @@ def fit_models(row):
     else:
         best_sn, best_res = 'cpl', cpl_res 
 
+    # TODO: Get the rchi2 limit for dof17
     if best_res['rchi2'] > 1.93:
         return {}
 
