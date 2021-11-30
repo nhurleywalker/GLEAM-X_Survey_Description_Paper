@@ -83,7 +83,10 @@ for i in range(6):
 #        lw=0.5,
 #        zorder=10+i)
     ax1.plot(np.sqrt(data[i]["radius"]**2 - bmaj**2), data[i]["aegean"]/data[i]["model"], 
-        ls="-.", 
+        ls="-",
+        marker="+", 
+        ms=4,
+        markeredgewidth=0.5, 
         color=colors[i], 
         lw=0.5,
         zorder=10+i)
@@ -101,7 +104,10 @@ for i in range(6):
 #        color=colors[i], 
 #        zorder=10+i)
     ax2.plot(np.sqrt(data_multi[i]["radius"]**2 - bmaj**2), data_multi[i]["aegean"]/data_multi[i]["model"], 
-        ls="-.", 
+        ls="-",
+        marker="+", 
+        ms=4,
+        markeredgewidth=0.5, 
         lw=0.5,
         color=colors[i], 
         zorder=10+i)
@@ -119,7 +125,10 @@ for i in range(6):
 #        color=colors[i], 
 #        zorder=10+i)
     ax3.plot(np.sqrt(data[i]["radius"]**2 - bmaj**2), data[i]["aegean"]/data[i]["model"], 
-        ls="-.", 
+        ls="-",
+        marker="+",
+        ms=4, 
+        markeredgewidth=0.5,
         lw=0.5,
         color=colors[i], 
         zorder=10+i)
@@ -137,7 +146,10 @@ for i in range(6):
 #        color=colors[i], 
 #        zorder=10+i)
     ax4.plot(np.sqrt(data_multi[i]["radius"]**2 - bmaj**2), data_multi[i]["aegean"]/data_multi[i]["model"], 
-        ls="-.", 
+        ls="-",
+        marker="+", 
+        ms=4,
+        markeredgewidth=0.5,
         lw=0.5,
         color=colors[i], 
         zorder=10+i)
@@ -150,12 +162,12 @@ for ax in [ax1, ax2, ax3, ax4]:
     for spacing in [0.6, 0.8, 1.0]:
         ax.axhline(spacing, ls="--", lw=1, color="grey")
 
-#handles = [Line2D([0], [0], linestyle="-", marker="+", color=colors[0], lw=0.5, markeredgewidth=0.25, label=r"uniform"),
-#           Line2D([0], [0], linestyle="-", marker="+",color=colors[1], lw=0.5, markeredgewidth=0.25, label=r"$r=0.0$"),
-#           Line2D([0], [0], linestyle="-", marker="+",color=colors[2], lw=0.5, markeredgewidth=0.25, label=r"$r=+0.5$"),
-#           Line2D([0], [0], linestyle="-", marker="+",color=colors[3], lw=0.5, markeredgewidth=0.25, label=r"$r=+1.0$"),
-#           Line2D([0], [0], linestyle="-", marker="+",color=colors[4], lw=0.5, markeredgewidth=0.25, label=r"$r=+2.0$"),
-#           Line2D([0], [0], linestyle="-", marker="+",color=colors[5], lw=0.5, markeredgewidth=0.25, label=r"natural"),
+handles = [Line2D([0], [0], linestyle="-", marker="+", color=colors[0], lw=0.5, markeredgewidth=0.5, label=r"uniform"),
+          Line2D([0], [0], linestyle="-", marker="+",color=colors[1], lw=0.5, markeredgewidth=0.5, label=r"$r=0.0$"),
+          Line2D([0], [0], linestyle="-", marker="+",color=colors[2], lw=0.5, markeredgewidth=0.5, label=r"$r=+0.5$"),
+          Line2D([0], [0], linestyle="-", marker="+",color=colors[3], lw=0.5, markeredgewidth=0.5, label=r"$r=+1.0$"),
+          Line2D([0], [0], linestyle="-", marker="+",color=colors[4], lw=0.5, markeredgewidth=0.5, label=r"$r=+2.0$"),
+          Line2D([0], [0], linestyle="-", marker="+",color=colors[5], lw=0.5, markeredgewidth=0.5, label=r"natural")]
 #           Line2D([0], [0], linestyle="-.", color=colors[0], lw=0.5, label=r"\texttt{aegean}, uniform"),
 #           Line2D([0], [0], linestyle="-.", color=colors[1], lw=0.5, label=r"\texttt{aegean}, $r=0.0$"),
 #           Line2D([0], [0], linestyle="-.", color=colors[2], lw=0.5, label=r"\texttt{aegean}, $r=+0.5$"),
@@ -163,12 +175,12 @@ for ax in [ax1, ax2, ax3, ax4]:
 #           Line2D([0], [0], linestyle="-.", color=colors[4], lw=0.5, label=r"\texttt{aegean}, $r=+2.0$"),
 #           Line2D([0], [0], linestyle="-.", color=colors[5], lw=0.5, label=r"\texttt{aegean}, natural"),]
 
-handles = [Line2D([0], [0], linestyle="-.", color=colors[0], lw=0.5, label=r"uniform"),
-           Line2D([0], [0], linestyle="-.", color=colors[1], lw=0.5, label=r"$r=0.0$"),
-           Line2D([0], [0], linestyle="-.", color=colors[2], lw=0.5, label=r"$r=+0.5$"),
-           Line2D([0], [0], linestyle="-.", color=colors[3], lw=0.5, label=r"$r=+1.0$"),
-           Line2D([0], [0], linestyle="-.", color=colors[4], lw=0.5, label=r"$r=+2.0$"),
-           Line2D([0], [0], linestyle="-.", color=colors[5], lw=0.5, label=r"natural")]
+# handles = [Line2D([0], [0], linestyle="-.", color=colors[0], lw=0.5, label=r"uniform"),
+#            Line2D([0], [0], linestyle="-.", color=colors[1], lw=0.5, label=r"$r=0.0$"),
+#            Line2D([0], [0], linestyle="-.", color=colors[2], lw=0.5, label=r"$r=+0.5$"),
+#            Line2D([0], [0], linestyle="-.", color=colors[3], lw=0.5, label=r"$r=+1.0$"),
+#            Line2D([0], [0], linestyle="-.", color=colors[4], lw=0.5, label=r"$r=+2.0$"),
+#            Line2D([0], [0], linestyle="-.", color=colors[5], lw=0.5, label=r"natural")]
 ax2.legend(ncol=2, bbox_to_anchor=(0.4,1.32), loc="upper left", fontsize=font_ticks-2.,
            handles=handles[::-1], handlelength=3., frameon=False)
 
