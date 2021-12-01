@@ -12,7 +12,8 @@ plt.rcParams.update({
 
 cm = 1/2.54
 
-TOPCSV='GLEAM-X J065228.65-255000.34.csv'
+# TOPCSV='GLEAM-X J065228.65-255000.34.csv'
+TOPCSV = 'GLEAM-X J055252.76-222513.62.csv'
 
 markers = {
     'gleamx':{'marker':'.', 'color':'black', 'label':'GLEAM-X', 'markeredgewidth':0.1, 'elinewidth':0.5},
@@ -132,7 +133,7 @@ def make_ax1(ax1, nu, csv=None):
     ax1.grid(
         which='both',
     )
-    ax1.legend()
+    ax1.legend(loc='lower right')
 
     ax1.set(
         xscale='log',
@@ -148,8 +149,8 @@ def make_ax1(ax1, nu, csv=None):
     overlay_box(
         ax1,
         f"{title}\nDouble Power Law",
-        y=0.05,
-        x=0.0155
+        y=0.875,
+        x=0.012
     )
 
 def make_small_ax(ax, nu, xlabel=None, onright=False, csv=None, model=None):
@@ -254,7 +255,7 @@ def make_small_ax(ax, nu, xlabel=None, onright=False, csv=None, model=None):
 
 def make_sed_figure(output='test.png'):
 
-    example_nu_large = np.geomspace(65, 2000, 200)
+    example_nu_large = np.geomspace(65, 1500, 200)
     example_nu = np.geomspace(65, 270, 200)
 
     ax1_loc = (0.1, 0.6, 0.8, 0.35)
