@@ -17,7 +17,7 @@ from mpl_toolkits.axes_grid1.anchored_artists import AnchoredEllipse
 from astropy.table import Table
 import astropy.units as u 
 from astropy.wcs import WCS
-from astropy.coordinates import SkyCoord, search_around_sky
+from astropy.coordinates import SkyCoord, proj_plane_pixel_scales
 from astropy.stats.circstats import circmean
 from astropy.nddata import Cutout2D
 from astropy.io import fits
