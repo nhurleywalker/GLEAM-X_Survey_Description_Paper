@@ -42,9 +42,8 @@ nsamps = ((((13.-4.)*15*np.cos(np.radians(-26.7)))*12)/(hd['BMAJ']*hd['BMIN']*1.
 
 ## FIND THOSE WITHIN THE CENTRAL REGION
 ##USING MIN RA OF 60 AND MAX 195 AND MIN DEC -32.7 MAX DEC -20.7
-keepneg = np.argwhere((cat_neg['ra']>= 60)&(cat_neg['ra']<= 195)&(cat_neg['dec']>= -32.7)&(cat_neg['dec']<= -20.7))[:, 0]
-
-keeppos = np.argwhere((cat_full['ra']>= 60)&(cat_full['ra']<= 195)&(cat_full['dec']>= -32.7)&(cat_full['dec']<= -20.7))[:, 0]
+keepneg = (cat_neg['ra']>= 60)&(cat_neg['ra']<= 195)&(cat_neg['dec']>= -32.7)&(cat_neg['dec']<= -20.7)
+keeppos = (cat_full['ra']>= 60)&(cat_full['ra']<= 195)&(cat_full['dec']>= -32.7)&(cat_full['dec']<= -20.7)
 
 
 cat_neg = cat_neg[keepneg]
@@ -98,20 +97,21 @@ drange = abs(peak_flux_bright/cat_neg['peak_flux'])
 
 ## SET CRITERIA 
 
-criteria1 = np.argwhere((sep_bright<= 5)&(drange>= 350)&(peak_flux_bright>= 2.))[:, 0]
-criteria2 = np.argwhere((sep_bright<= 12)&(sep_bright>5)&(drange>= 650)&(peak_flux_bright>= 6.))[:, 0]
+criteria1 = (sep_bright<= 5)&(drange>= 350)&(peak_flux_bright>= 2.)
+criteria2 = (sep_bright<= 12)&(sep_bright>5)&(drange>= 650)&(peak_flux_bright>= 6.)
 
-flag = np.zeros(nneg)
-flag[criteria1] = 1
-flag[criteria2] = 1
+og_criteria1=(sep_bright<=10)&(drange>=30)&(peak_flux_bright>=0.1)
+og_criteria1=(sep_bright<= 5)&(drange>= 350)&(peak_flux_bright>= 2.)
+og_criteria2=sep_close<=2
 
-good = np.argwhere(flag == 0)[:, 0]
+good = np.argwhere((criteria1 | criteria2) == False)[:,0]
+og_good = np.argwhere((og_criteria1 | og_criteria2) == False)[:,0]
 
 ## DO SAME MATCHING AND FILTERING FOR POSTIVE CATALOGUE
 search_pos = coords_pos.search_around_sky(coords_pos, 15*u.arcmin)
 
-brightid_pos = np.zeros(npos)
-sep_bright_pos = np.zeros(npos)
+brightid_pos = np.zeros(npos).astype(int)
+sep_bright_pos = np.zeros(npos).astype(int)
 
 closeid_pos = np.zeros(npos)
 sep_close_pos = np.zeros(npos)
@@ -125,19 +125,19 @@ for i in range(npos):
         sep_close_pos[i] = (search_pos[2][jj].value*60).min()
         closeid_pos[i] = search_pos[0][jj][np.argmin(search_pos[2][jj])]
 
-brightid_pos = brightid_pos.astype(int)
-closeid_pos = closeid_pos.astype(int)
 peak_flux_bright_pos = cat_full['peak_flux'][brightid_pos]
 drange_pos = abs(peak_flux_bright_pos/cat_full['peak_flux'])
 
-criteria1_pos = np.argwhere((sep_bright_pos<= 5)&(drange_pos>= 350)&(peak_flux_bright_pos>= 2.))[:, 0]
-criteria2_pos = np.argwhere((sep_bright_pos<= 12)&(sep_bright_pos>5)&(drange_pos>= 650)&(peak_flux_bright_pos>= 6.))[:, 0]
+criteria1_pos = (sep_bright_pos<= 5)&(drange_pos>= 350)&(peak_flux_bright_pos>= 2.)
+criteria2_pos = (sep_bright_pos<= 12)&(sep_bright_pos>5)&(drange_pos>= 650)&(peak_flux_bright_pos>= 6.)
 
-flag_pos = np.zeros(npos)
-flag_pos[criteria1_pos] = 1
-flag_pos[criteria2_pos] = 1
+og_criteria1_pos = (sep_bright_pos<=10)&(drange_pos>=30)&(peak_flux_bright_pos>=0.1)
+og_criteria1_pos = (sep_bright_pos<= 5)&(drange_pos>= 350)&(peak_flux_bright_pos>= 2.)
+og_criteria2_pos = sep_close_pos<=2
 
-good_pos = np.argwhere(flag_pos == 0)[:, 0]
+good_pos = np.argwhere((criteria1_pos | criteria2_pos) == False )[:,0]
+og_good_pos = np.argwhere((og_criteria1_pos | og_criteria2_pos) == False )[:,0]
+
 
 ## MAKE A NEW REGION FILE 
 with open('negatives_sub_filtered_new.reg', 'w') as outf1:
@@ -159,13 +159,10 @@ if not os.path.exists("XG_170-231MHz_comp_rescaled_filtered.fits"):
 if not os.path.exists("XG_170-231MHz_psf_comp_negative_dafix_comp_filtered.fits"):
     fits.writeto('XG_170-231MHz_psf_comp_negative_dafix_comp_filtered.fits', cat_neg[good], header = cat_neghd)
 
-# TODO make it python3 friendly
-#outf1 = open('Filtered_Cat_GOOD_IDS.dat', 'w')
-#for i in range(good_pos.size):
-#    print >> outf1, good_pos[i]
-#
-#outf1.close()
-
+with open('Filtered_Cat_GOOD_IDS.dat', 'w') as outf1:
+    for gpi in good_pos:
+       print(good_pos, file=outf1)
+    
 ### MAKE SOME PLOTS
 
 fig = plt.figure(figsize = (8*cm, 8*cm))
@@ -192,15 +189,26 @@ ax.set_xlabel('ABS(Peak SNR)')
 fig.tight_layout()
 fig.savefig('GLEAMX_neg-ratio.png')
 
-hsnrfull = np.histogram(cat_full['int_flux'][good_pos]/cat_full['local_rms'][good_pos], bins = np.linspace(5, 8, 10))
-hsnrneg = np.histogram((cat_neg['int_flux'][good]*-1)/cat_neg['local_rms'][good], bins = np.linspace(5, 8, 10))
+bin_edge = np.linspace(5, 8, 10)
+bin_cen = (bin_edge[:-1] + bin_edge[1:]) / 2
+
+no_filt_hsnrfull = np.histogram(cat_full['int_flux']/cat_full['local_rms'], bins = bin_edge)
+no_filt_hsnrneg = np.histogram((cat_neg['int_flux']*-1)/cat_neg['local_rms'], bins = bin_edge)
+
+hsnrfull = np.histogram(cat_full['int_flux'][og_good_pos]/cat_full['local_rms'][og_good_pos], bins = bin_edge)
+hsnrneg = np.histogram((cat_neg['int_flux'][og_good]*-1)/cat_neg['local_rms'][og_good], bins = bin_edge)
 hsnrhx = (hsnrneg[1][1:]+hsnrneg[1][:-1])/2
+
+
 
 fig = plt.figure(figsize = (8*cm, 8*cm))
 ax = fig.add_subplot(111)
 #ax.plot(hsnrhx, (hsnrneg[0]/hsnrfull[0].astype('float64'))*100, 'r-')
-ax.plot(hsnrhx, 100*(1-(hsnrneg[0]/hsnrfull[0].astype('float64'))), 'r-')
+ax.plot(hsnrhx, 100*(1-(hsnrneg[0]/hsnrfull[0].astype('float64'))), 'r-', label='Filtered')
+ax.plot(hsnrhx, 100*(1-(no_filt_hsnrneg[0]/no_filt_hsnrfull[0].astype('float64'))), 'b-', label='Not Filtered')
 ax.set_ylabel('Reliability / \%')
 ax.set_xlabel('Signal-to-noise ($S_\mathrm{int} / \sigma$)')
+ax.legend(loc='lower right')
 fig.tight_layout()
 fig.savefig('reliability.pdf')
+fig.savefig('reliability.png', transparent=False)
