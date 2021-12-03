@@ -3,11 +3,12 @@ from argparse import ArgumentParser
 import logging
 from collections import Counter
 from multiprocessing import Pool
+import warnings 
 
 import matplotlib
 matplotlib.use('Agg')
 
-
+from reproject.mosaicking import find_optimal_celestial_wcs
 from tqdm import tqdm
 import numpy as np
 import matplotlib.pyplot as plt
@@ -15,6 +16,7 @@ from matplotlib.ticker import FormatStrFormatter
 import pandas as pd
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredEllipse
 from astropy.table import Table
+from astropy.utils.exceptions import AstropyWarning
 import astropy.units as u 
 from astropy.wcs import WCS
 from astropy.coordinates import SkyCoord
@@ -23,6 +25,7 @@ from astropy.stats.circstats import circmean
 from astropy.nddata import Cutout2D
 from astropy.io import fits
 
+warnings.simplefilter('ignore', category=AstropyWarning)
 
 plt.rcParams.update({
     "text.usetex": True,
@@ -87,7 +90,7 @@ def get_freq_flux_err(row, apply_mask = True, internal_scale=0.02):
         int_flux = int_flux[mask]
         err_flux = err_flux[mask]
     
-    return freq, int_flux, err_flux
+    return freq, int_flux*1000, err_flux*1000
 
 def add_beam(ax, wcs, psf_file, psf_pos, loc, hatch):
     
@@ -105,19 +108,19 @@ def add_beam(ax, wcs, psf_file, psf_pos, loc, hatch):
     
     bmaj = beamsize[0] / degrees_per_pixel
     bmin = beamsize[1] / degrees_per_pixel
-    bpa = -beamsize[2]
+    bpa = beamsize[2]
 
     bmaj = beamsize[0] / sx
     bmin = beamsize[1] / sy
     
     beam1 = AnchoredEllipse(ax.transData, width=bmaj, height=bmin, angle=bpa,
-                         loc=loc, pad=0.5, borderpad=0.4,
-                         frameon=False )
+                         loc=loc, pad=0.15, borderpad=0.4,
+                         frameon=False)
     
     beam1.ellipse.set_fc('white')
-    beam1.ellipse.set_ec('black')
-    beam1.ellipse.set_hatch(hatch)
+    beam1.ellipse.set_hatch('//')
     beam1.ellipse.set_fill('white')
+    # beam1.ellipse.set_alpha(0.5)
     ax.add_artist(beam1)
 
 
@@ -153,6 +156,13 @@ def plot_img_sed(idx, isl_df, img_deep_path, img_low_path, sep, deep_psf, low_ps
             wcs=w,
             copy=True
         )
+        new_wcs, new_shape = find_optimal_celestial_wcs(
+            ((cutout.data, cutout.wcs),), 
+            projection='SIN',
+            reference=mean_pos
+        )
+        
+
 
     with fits.open(img_low_path) as img_fits:
         w = WCS(img_fits[0].header)
@@ -163,6 +173,11 @@ def plot_img_sed(idx, isl_df, img_deep_path, img_low_path, sep, deep_psf, low_ps
             wcs=w,
             copy=True
         )
+        new_low_wcs, new_low_shape = find_optimal_celestial_wcs(
+            ((cutout_low.data, cutout_low.wcs),), 
+            projection='SIN',
+            reference=mean_pos
+        )
 
 
     fig = plt.figure(figsize=(cm(10), cm(24)))
@@ -171,15 +186,16 @@ def plot_img_sed(idx, isl_df, img_deep_path, img_low_path, sep, deep_psf, low_ps
     loc2 = [0.2, 0.33,0.8, 0.29]
     loc3 = [0.175,0.05,0.78, 0.225]
 
-    img_ax = fig.add_axes(loc1, projection=cutout.wcs)
-    img_low_ax = fig.add_axes(loc2, projection=cutout_low.wcs)
+    img_ax = fig.add_axes(loc1, projection=new_wcs)#cutout.wcs)
+    img_low_ax = fig.add_axes(loc2, projection=new_low_wcs)#cutout_low.wcs)
     ax = fig.add_axes(loc3)
 
 
     img_ax.imshow(
         cutout.data,
         vmin=-0.001,
-        vmax=0.02
+        vmax=0.02,
+        transform=img_ax.get_transform(cutout.wcs)
     )
     grid_kw = dict(color='white', ls='solid')
     img_ax.coords.grid(True, **grid_kw)
@@ -188,41 +204,77 @@ def plot_img_sed(idx, isl_df, img_deep_path, img_low_path, sep, deep_psf, low_ps
     lon.set_axislabel_position('t')
     lon.set_axislabel('Right Ascension')
     img_ax.coords[1].set_axislabel('Declination')
-    overlay_box(img_ax, '170-231$\,$MHz', x=0.01, y=0.01)
+    overlay_box(img_ax, '170-231$\,$MHz', x=0.02, y=0.02)
     if deep_psf is not None:
-        add_beam(img_ax, cutout.wcs, deep_psf, mean_pos, 'upper right', '//')
+        add_beam(img_ax, new_wcs, deep_psf, mean_pos, 'upper right', '//')
+
+    fov = 500
+    xlim = [-fov, fov]*u.arcsec
+    ylim = [-fov, fov]*u.arcsec
+
+    positions = new_wcs.all_world2pix(
+            mean_pos.ra + xlim, 
+            mean_pos.dec + ylim,
+            0
+    )
+    img_ax.set(
+        xlim=positions[0][::-1],
+        ylim=positions[1]
+    )
+
 
     img_low_ax.imshow(
         cutout_low.data,
         vmin=-0.01,
-        vmax=0.08
+        vmax=0.08,
+        transform=img_low_ax.get_transform(cutout_low.wcs)
     )
     img_low_ax.coords.grid(True, **grid_kw)
     lon = img_low_ax.coords[0]
     lon.set_axislabel('Right Ascension')
     img_low_ax.coords[1].set_axislabel('Declination')
-    overlay_box(img_low_ax, '72-103$\,$MHz',x=0.01, y=0.01)
+    overlay_box(img_low_ax, '72-103$\,$MHz',x=0.02, y=0.02)
     if low_psf is not None:
-        add_beam(img_low_ax, cutout.wcs, low_psf, mean_pos, 'upper right', '//')
+        add_beam(img_low_ax, new_low_wcs, low_psf, mean_pos, 'upper right', '//')
 
+
+    fov = 500
+    xlim = [-fov, fov]*u.arcsec
+    ylim = [-fov, fov]*u.arcsec
+
+    positions = new_low_wcs.all_world2pix(
+            mean_pos.ra + xlim, 
+            mean_pos.dec + ylim,
+            0
+    )
+    img_low_ax.set(
+        xlim=positions[0][::-1],
+        ylim=positions[1]
+    )
 
     colours=['red','blue','green']
-    markers=['+','x','1']
+    markers=['1','x','+']
+    tot_flux = []
+    tot_fluxerr = []
     for count, (idx, row) in enumerate(isl_df.iterrows()):
-        freq, flux, fluxerr = get_freq_flux_err(row)
+        freq, flux, fluxerr = get_freq_flux_err(row, apply_mask=False)
         pos_sky = SkyCoord(row.ref_ra*u.deg, row.ref_dec*u.deg)
         src_str = CoordStr(pos_sky)
         colour = colours[count]
         marker = markers[count]
 
+        tot_flux.append(flux)
+        tot_fluxerr.append(fluxerr)
+
         ax.errorbar(
             freq,
-            flux*1000,
-            yerr=fluxerr*1000,
+            flux,
+            yerr=fluxerr,
             ls='None',
             marker=marker,
             label=src_str.tex,
-            color=colour
+            color=colour,
+            capsize=2
         )
 
         img_ax.scatter(
@@ -245,7 +297,20 @@ def plot_img_sed(idx, isl_df, img_deep_path, img_low_path, sep, deep_psf, low_ps
             zorder=100
         )
 
-    ax.legend(loc='upper right')
+    tot_flux = np.sum(tot_flux, axis=0)
+    tot_fluxerr = np.sqrt(np.sum(np.array(tot_fluxerr)**2, axis=0))
+    mask = np.isfinite(tot_flux) & np.isfinite(tot_fluxerr)
+    ax.errorbar(
+        freq[mask],
+        tot_flux[mask],
+        yerr=tot_fluxerr[mask],
+        linestyle='None',
+        marker='+',
+        label='Total',
+        capsize=2
+    )
+
+    ax.legend(loc='upper right', prop={'size': 6})
     ax.loglog()
     ax.set(
         xlabel='Frequency (MHz)',
