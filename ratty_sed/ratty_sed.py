@@ -17,7 +17,8 @@ from mpl_toolkits.axes_grid1.anchored_artists import AnchoredEllipse
 from astropy.table import Table
 import astropy.units as u 
 from astropy.wcs import WCS
-from astropy.coordinates import SkyCoord, search_around_sky
+from astropy.coordinates import SkyCoord
+from astropy.wcs.utils import proj_plane_pixel_scales
 from astropy.stats.circstats import circmean
 from astropy.nddata import Cutout2D
 from astropy.io import fits
@@ -88,7 +89,13 @@ def get_freq_flux_err(row, apply_mask = True, internal_scale=0.02):
     
     return freq, int_flux, err_flux
 
-def add_beam(ax, wcs, beamsize, loc, hatch):
+def add_beam(ax, wcs, psf_file, psf_pos, loc, hatch):
+    
+    with fits.open(psf_file) as psf_fits:
+        psf_wcs = WCS(psf_fits[0].header).celestial
+        x_pix, y_pix = psf_wcs.all_world2pix(psf_pos.ra, psf_pos.dec, 0)
+        beamsize = psf_fits[0].data[:3, int(y_pix), int(x_pix)]
+
     pix_scale = proj_plane_pixel_scales(wcs.celestial)
     
     sx = pix_scale[0]
@@ -98,7 +105,7 @@ def add_beam(ax, wcs, beamsize, loc, hatch):
     
     bmaj = beamsize[0] / degrees_per_pixel
     bmin = beamsize[1] / degrees_per_pixel
-    bpa = beamsize[2]
+    bpa = -beamsize[2]
 
     bmaj = beamsize[0] / sx
     bmin = beamsize[1] / sy
@@ -123,7 +130,7 @@ def overlay_box(ax, text, x=0.02, y=0.125):
         bbox=dict(facecolor='white', alpha=0.8, edgecolor='black', boxstyle='round,pad=0.25')
     )
 
-def plot_img_sed(idx, isl_df, img_deep_path, img_low_path, sep):
+def plot_img_sed(idx, isl_df, img_deep_path, img_low_path, sep, deep_psf, low_psf):
     if len(isl_df) != 2:
         return 
 
@@ -136,7 +143,7 @@ def plot_img_sed(idx, isl_df, img_deep_path, img_low_path, sep):
         return
 
     mean_pos = SkyCoord(circmean(comp_pos.ra), np.mean(comp_pos.dec))
-    img_fac = 10
+    img_fac = 15
     with fits.open(img_deep_path) as img_fits:
         w = WCS(img_fits[0].header)
         cutout = Cutout2D(
@@ -182,6 +189,8 @@ def plot_img_sed(idx, isl_df, img_deep_path, img_low_path, sep):
     lon.set_axislabel('Right Ascension')
     img_ax.coords[1].set_axislabel('Declination')
     overlay_box(img_ax, '170-231$\,$MHz', x=0.01, y=0.01)
+    if deep_psf is not None:
+        add_beam(img_ax, cutout.wcs, deep_psf, mean_pos, 'upper right', '//')
 
     img_low_ax.imshow(
         cutout_low.data,
@@ -193,6 +202,9 @@ def plot_img_sed(idx, isl_df, img_deep_path, img_low_path, sep):
     lon.set_axislabel('Right Ascension')
     img_low_ax.coords[1].set_axislabel('Declination')
     overlay_box(img_low_ax, '72-103$\,$MHz',x=0.01, y=0.01)
+    if low_psf is not None:
+        add_beam(img_low_ax, cutout.wcs, low_psf, mean_pos, 'upper right', '//')
+
 
     colours=['red','blue','green']
     markers=['+','x','1']
@@ -254,7 +266,7 @@ def plot_img_sed(idx, isl_df, img_deep_path, img_low_path, sep):
 def wrap(info_dict):
         plot_img_sed(*info_dict)
 
-def find_plot_rats(table_path, image_deep_path, image_low_path, sep=80):
+def find_plot_rats(table_path, image_deep_path, image_low_path, sep=80, deep_psf=None, low_psf=None):
     if not os.path.exists(OUTDIR):
         logger.info(f"Creating {OUTDIR}")
         os.mkdir(OUTDIR)
@@ -280,7 +292,7 @@ def find_plot_rats(table_path, image_deep_path, image_low_path, sep=80):
 
     
     with Pool(4, maxtasksperchild=24) as pool:
-        results =  list(tqdm(pool.imap(wrap, [(isl_id, sub_df, image_deep_path, image_low_path, sep) for (isl_id, sub_df) in crop_df.groupby('island')], chunksize=8)))
+        results =  list(tqdm(pool.imap(wrap, [(isl_id, sub_df, image_deep_path, image_low_path, sep, deep_psf, low_psf) for (isl_id, sub_df) in crop_df.groupby('island')], chunksize=8)))
 
 
 if __name__ == '__main__':
@@ -290,6 +302,8 @@ if __name__ == '__main__':
     parser.add_argument('image_deep', type=str, help='Path to the reference deep source finding image')
     parser.add_argument('image_low', type=str, help='Path to a low frequency image')
     parser.add_argument('--island-sep', type=float, default=80, help='Separation in arcsec between components in an island')
+    parser.add_argument('--deep-psf', type=str, default=None, help='Path to the projpsf file for the deep source finding image')
+    parser.add_argument('--low-psf', type=str, default=None, help='Path to the projpsf file for the low resolution image')
 
     args = parser.parse_args()
 
@@ -297,5 +311,7 @@ if __name__ == '__main__':
         args.table,
         args.image_deep,
         args.image_low,
-        sep=args.island_sep
+        sep=args.island_sep,
+        deep_psf=args.deep_psf,
+        low_psf=args.low_psf,
     )
