@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from matplotlib.path import Path
 #import matplotlib.cm as cmap
 import pandas as pd
 import numpy as np
@@ -32,6 +33,23 @@ ax.set_ylabel("RMS noise / mJy beam$^{-1}$")
 # Data
 #c = ax.scatter(dataset["mean_freq"], dataset["S-min"]/5, s = 50*np.sqrt(dataset["resolution"]), c = dataset["area"]/1000, cmap="cool", alpha=0.7, zorder = 10)
 c = ax.scatter(dataset["mean_freq"], dataset["S-min"]/5, s = 10*dataset["resolution"], c = dataset["area"]/1000, cmap="cool", alpha=0.7, zorder = 10)
+
+# Survey Declination coverage
+for i in range(0, len(dataset["Name"])):
+    dec_min = dataset["Dec_min"][i]
+    dec_max = dataset["Dec_max"][i]
+    if dec_max == 90:
+    # Northern hemisphere sky survey
+        arc_start = 0 + dec_min
+        arc_end = 180 - dec_min
+    else:
+    # Southern hemisphere sky survey
+        arc_start = 180 - dec_max
+        arc_end = 0 + dec_max
+    a = Path.arc(arc_start, arc_end)
+    ax.scatter(dataset["mean_freq"][i], dataset["S-min"][i]/5, s = 10*dataset["resolution"][i], marker = a, edgecolor="k", lw=1.5, facecolor="none", alpha=0.4, zorder=11)
+
+
 # Labels
 for i, txt in enumerate(dataset["Name"]):
     if txt == "GLEAM-X":
