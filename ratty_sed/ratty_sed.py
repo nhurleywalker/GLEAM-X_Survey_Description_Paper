@@ -182,8 +182,8 @@ def plot_img_sed(idx, isl_df, img_deep_path, img_low_path, sep, deep_psf, low_ps
 
     fig = plt.figure(figsize=(cm(10), cm(24)))
 
-    loc1 = [0.2,0.63,0.8, 0.29]
-    loc2 = [0.2, 0.33,0.8, 0.29]
+    loc1 = [0.175,0.63,0.78, 0.29]
+    loc2 = [0.175, 0.33,0.78, 0.29]
     loc3 = [0.175,0.05,0.78, 0.225]
 
     img_ax = fig.add_axes(loc1, projection=new_wcs)#cutout.wcs)
@@ -194,8 +194,10 @@ def plot_img_sed(idx, isl_df, img_deep_path, img_low_path, sep, deep_psf, low_ps
     img_ax.imshow(
         cutout.data,
         vmin=-0.001,
-        vmax=0.02,
-        transform=img_ax.get_transform(cutout.wcs)
+        vmax=0.25,
+        # vmax=0.95*np.sum(isl_df['int_flux']),
+        transform=img_ax.get_transform(cutout.wcs),
+        aspect='auto'
     )
     grid_kw = dict(color='white', ls='solid')
     img_ax.coords.grid(True, **grid_kw)
@@ -226,8 +228,10 @@ def plot_img_sed(idx, isl_df, img_deep_path, img_low_path, sep, deep_psf, low_ps
     img_low_ax.imshow(
         cutout_low.data,
         vmin=-0.01,
-        vmax=0.08,
-        transform=img_low_ax.get_transform(cutout_low.wcs)
+        vmax=0.95,
+        # vmax=0.95*np.sum(isl_df['int_flux_W_072_103MHz']),
+        transform=img_low_ax.get_transform(cutout_low.wcs),
+        aspect='auto'
     )
     img_low_ax.coords.grid(True, **grid_kw)
     lon = img_low_ax.coords[0]
