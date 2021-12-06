@@ -138,27 +138,59 @@ og_criteria2_pos = sep_close_pos<=2
 good_pos = np.argwhere((criteria1_pos | criteria2_pos) == False )[:,0]
 og_good_pos = np.argwhere((og_criteria1_pos | og_criteria2_pos) == False )[:,0]
 
+# The sources that are removed -- we want to record these somewhere
+bad = np.argwhere((criteria1 | criteria2) == True)[:,0]
+bad_pos = np.argwhere((criteria1_pos | criteria2_pos) == True )[:,0]
 
-## MAKE A NEW REGION FILE 
+# Region files
+# Positive sources that remain after the mandatory filter
+with open('positives_sub_filtered_new.reg', 'w') as outf1:
+    outf1.write("fk5\n")
+    for i in range(good_pos.size):
+        outf1.write(f"point({cat_full['ra'][good_pos][i]},{cat_full['dec'][good_pos][i]}) # point = X color = green\n")
+
+# Positive sources that are removed by the mandatory filter
+with open('positives_sub_filtered_removed.reg', 'w') as outf1:
+    outf1.write("fk5\n")
+    for i in range(bad_pos.size):
+        outf1.write(f"point({cat_full['ra'][bad_pos][i]},{cat_full['dec'][bad_pos][i]}) # point = cross color = red\n")
+
+# Negative sources that remain after the mandatory filter
 with open('negatives_sub_filtered_new.reg', 'w') as outf1:
     outf1.write("fk5\n")
     for i in range(good.size):
-        outf1.write(f"point({cat_neg['ra'][good[i]]},{cat_neg['dec'][good[i]]}) # point = X color = magenta\n")
+        outf1.write(f"point({cat_neg['ra'][good][i]},{cat_neg['dec'][good][i]}) # point = X color = magenta\n")
 
-with open('positives_sub_filtered_new.reg', 'w') as outf1:
+# Negative sources that are removed by the mandatory filter
+with open('negatives_sub_filtered_new.reg', 'w') as outf1:
     outf1.write("fk5\n")
     for i in range(good.size):
-        outf1.write(f"point({cat_full['ra'][good[i]]},{cat_full['dec'][good[i]]}) # point = X color = green\n")
+        outf1.write(f"point({cat_neg['ra'][bad][i]},{cat_neg['dec'][bad][i]}) # point = cross color = yellow\n")
+
+
+# Save these as FITS tables as well so we can load them into other code
 
 cat_neghd = fits.getheader('XG_170-231MHz_psf_comp_negative_dafix_comp.fits', 1)
 cat_fullhd = fits.getheader('XG_170-231MHz_comp_rescaled.fits', 1)
 
+# Positive sources that remain after the mandatory filter
 if not os.path.exists("XG_170-231MHz_comp_rescaled_filtered.fits"):
     fits.writeto('XG_170-231MHz_comp_rescaled_filtered.fits', cat_full[good_pos], header = cat_fullhd)
 
+# Positive sources that are removed by the mandatory filter
+if not os.path.exists("XG_170-231MHz_psf_comp_positive_dafix_comp_removed.fits"):
+    fits.writeto('XG_170-231MHz_psf_comp_positive_dafix_comp_removed.fits', cat_full[bad_pos], header = cat_fullhd)
+
+# Negative sources that remain after the mandatory filter
 if not os.path.exists("XG_170-231MHz_psf_comp_negative_dafix_comp_filtered.fits"):
     fits.writeto('XG_170-231MHz_psf_comp_negative_dafix_comp_filtered.fits', cat_neg[good], header = cat_neghd)
 
+# Negative sources that are removed by the mandatory filter
+if not os.path.exists("XG_170-231MHz_psf_comp_negative_dafix_comp_removed.fits"):
+    fits.writeto('XG_170-231MHz_psf_comp_negative_dafix_comp_removed.fits', cat_neg[good], header = cat_neghd)
+
+
+with open('Filtered_Cat_GOOD_IDS.dat', 'w') as outf1:
 with open('Filtered_Cat_GOOD_IDS.dat', 'w') as outf1:
     for gpi in good_pos:
        print(good_pos, file=outf1)
