@@ -24,6 +24,7 @@ from astropy.wcs.utils import proj_plane_pixel_scales
 from astropy.stats.circstats import circmean
 from astropy.nddata import Cutout2D
 from astropy.io import fits
+from astropy.visualization import AsinhStretch, simple_norm
 
 warnings.simplefilter('ignore', category=AstropyWarning)
 
@@ -191,10 +192,10 @@ def plot_img_sed(idx, isl_df, img_deep_path, img_low_path, sep, deep_psf, low_ps
     ax = fig.add_axes(loc3)
 
 
+    norm = simple_norm(cutout.data, 'asinh')
     img_ax.imshow(
         cutout.data,
-        vmin=-0.001,
-        vmax=0.25,
+        norm=norm,
         # vmax=0.95*np.sum(isl_df['int_flux']),
         transform=img_ax.get_transform(cutout.wcs),
         aspect='auto'
@@ -225,10 +226,10 @@ def plot_img_sed(idx, isl_df, img_deep_path, img_low_path, sep, deep_psf, low_ps
     )
 
 
+    norm = simple_norm(cutout_low.data, 'asinh')
     img_low_ax.imshow(
         cutout_low.data,
-        vmin=-0.01,
-        vmax=0.95,
+        norm=norm,
         # vmax=0.95*np.sum(isl_df['int_flux_W_072_103MHz']),
         transform=img_low_ax.get_transform(cutout_low.wcs),
         aspect='auto'
