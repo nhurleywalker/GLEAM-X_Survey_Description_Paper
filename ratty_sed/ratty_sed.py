@@ -59,8 +59,8 @@ class CoordStr:
         _format = None if tex is False else 'latex'
         
         return (f'GLEAM-X '\
-                f'J{self.pos.ra.to_string(unit=u.hourangle, sep="", precision=2, pad=True, format=_format)}' \
-                f'{self.pos.dec.to_string(sep="", precision=2, alwayssign=True, pad=True, format=_format)}')
+                f'J{self.pos.ra.to_string(unit=u.hourangle, sep="", precision=1, pad=True, format=_format)}' \
+                f'{self.pos.dec.to_string(sep="", precision=0, alwayssign=True, pad=True, format=_format)}')
 
     def __str__(self):
         return self._make_str()
@@ -318,7 +318,7 @@ def plot_img_sed(idx, isl_df, img_deep_path, img_low_path, sep, deep_psf, low_ps
     ax.loglog()
     ax.set(
         xlabel='Frequency (MHz)',
-        ylabel='Integrated Flux (Jy)'
+        ylabel='Flux Density (Jy)'
     )
     ax.grid(
         which='both',
