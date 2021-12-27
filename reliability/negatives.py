@@ -36,9 +36,15 @@ cat_neg = fits.getdata('XG_170-231MHz_psf_comp_negative_dafix_comp.fits')
 
 cat_full = fits.getdata('XG_170-231MHz_comp_rescaled.fits', 1)
 
-hd = fits.getheader('XG_170-231MHz.fits')
+# Don't download the enormous mosaic just to get the bmaj and bmin; hardcoding them here
 
-nsamps = ((((13.-4.)*15*np.cos(np.radians(-26.7)))*12)/(hd['BMAJ']*hd['BMIN']*1.13))*2.
+#hd = fits.getheader('XG_170-231MHz.fits')
+#bmaj = hd["BMAJ"]
+#bmin = hd["BMIN"]
+bmaj = 2.07931250334E-02
+bmin = 1.63785628974E-02
+
+nsamps = ((((13.-4.)*15*np.cos(np.radians(-26.7)))*12)/(bmaj*bmin*1.13))*2.
 
 ## FIND THOSE WITHIN THE CENTRAL REGION
 ##USING MIN RA OF 60 AND MAX 195 AND MIN DEC -32.7 MAX DEC -20.7
@@ -104,8 +110,9 @@ og_criteria1=(sep_bright<=10)&(drange>=30)&(peak_flux_bright>=0.1)
 og_criteria1=(sep_bright<= 5)&(drange>= 350)&(peak_flux_bright>= 2.)
 og_criteria2=sep_close<=2
 
-good = np.argwhere((criteria1 | criteria2) == False)[:,0]
-og_good = np.argwhere((og_criteria1 | og_criteria2) == False)[:,0]
+good_neg = np.argwhere((criteria1 | criteria2) == False)[:,0]
+og_good_neg = np.argwhere((og_criteria1 | og_criteria2) == False)[:,0]
+comb_good_neg = np.argwhere((criteria1 | criteria2 | og_criteria1 | og_criteria2) == False)[:,0]
 
 ## DO SAME MATCHING AND FILTERING FOR POSTIVE CATALOGUE
 search_pos = coords_pos.search_around_sky(coords_pos, 15*u.arcmin)
@@ -131,42 +138,47 @@ drange_pos = abs(peak_flux_bright_pos/cat_full['peak_flux'])
 criteria1_pos = (sep_bright_pos<= 5)&(drange_pos>= 350)&(peak_flux_bright_pos>= 2.)
 criteria2_pos = (sep_bright_pos<= 12)&(sep_bright_pos>5)&(drange_pos>= 650)&(peak_flux_bright_pos>= 6.)
 
-og_criteria1_pos = (sep_bright_pos<=10)&(drange_pos>=30)&(peak_flux_bright_pos>=0.1)
-og_criteria1_pos = (sep_bright_pos<= 5)&(drange_pos>= 350)&(peak_flux_bright_pos>= 2.)
-og_criteria2_pos = sep_close_pos<=2
+# I don't agree with Tim in including this -- we never want to filter the positive sources with these "OG" criteria
+#og_criteria1_pos = (sep_bright_pos<=10)&(drange_pos>=30)&(peak_flux_bright_pos>=0.1)
+#og_criteria1_pos = (sep_bright_pos<= 5)&(drange_pos>= 350)&(peak_flux_bright_pos>= 2.)
+#og_criteria2_pos = sep_close_pos<=2
 
+# Positive sources that remain after the mandatory filter
 good_pos = np.argwhere((criteria1_pos | criteria2_pos) == False )[:,0]
-og_good_pos = np.argwhere((og_criteria1_pos | og_criteria2_pos) == False )[:,0]
 
 # The sources that are removed -- we want to record these somewhere
-bad = np.argwhere((criteria1 | criteria2) == True)[:,0]
+# Negative sources
+bad_neg = np.argwhere((criteria1 | criteria2) == True)[:,0]
+# Positive sources
 bad_pos = np.argwhere((criteria1_pos | criteria2_pos) == True )[:,0]
+
+# I don't agree with Tim in including this -- we never want to filter the positive sources with these "OG" criteria
+#og_good_pos = np.argwhere((og_criteria1_pos | og_criteria2_pos) == False )[:,0]
 
 # Region files
 # Positive sources that remain after the mandatory filter
-with open('positives_sub_filtered_new.reg', 'w') as outf1:
+with open('positives_not_near_bright.reg', 'w') as outf1:
     outf1.write("fk5\n")
     for i in range(good_pos.size):
         outf1.write(f"point({cat_full['ra'][good_pos][i]},{cat_full['dec'][good_pos][i]}) # point = X color = green\n")
 
 # Positive sources that are removed by the mandatory filter
-with open('positives_sub_filtered_removed.reg', 'w') as outf1:
+with open('positives_near_bright.reg', 'w') as outf1:
     outf1.write("fk5\n")
     for i in range(bad_pos.size):
         outf1.write(f"point({cat_full['ra'][bad_pos][i]},{cat_full['dec'][bad_pos][i]}) # point = cross color = red\n")
 
 # Negative sources that remain after the mandatory filter
-with open('negatives_sub_filtered_new.reg', 'w') as outf1:
+with open('negatives_not_near_bright.reg', 'w') as outf1:
     outf1.write("fk5\n")
-    for i in range(good.size):
-        outf1.write(f"point({cat_neg['ra'][good][i]},{cat_neg['dec'][good][i]}) # point = X color = magenta\n")
+    for i in range(good_neg.size):
+        outf1.write(f"point({cat_neg['ra'][good_neg][i]},{cat_neg['dec'][good_neg][i]}) # point = X color = magenta\n")
 
 # Negative sources that are removed by the mandatory filter
-with open('negatives_sub_filtered_new.reg', 'w') as outf1:
+with open('negatives_near_bright.reg', 'w') as outf1:
     outf1.write("fk5\n")
-    for i in range(good.size):
-        outf1.write(f"point({cat_neg['ra'][bad][i]},{cat_neg['dec'][bad][i]}) # point = cross color = yellow\n")
-
+    for i in range(bad_neg.size):
+        outf1.write(f"point({cat_neg['ra'][bad_neg][i]},{cat_neg['dec'][bad_neg][i]}) # point = cross color = yellow\n")
 
 # Save these as FITS tables as well so we can load them into other code
 
@@ -183,14 +195,13 @@ if not os.path.exists("XG_170-231MHz_psf_comp_positive_dafix_comp_removed.fits")
 
 # Negative sources that remain after the mandatory filter
 if not os.path.exists("XG_170-231MHz_psf_comp_negative_dafix_comp_filtered.fits"):
-    fits.writeto('XG_170-231MHz_psf_comp_negative_dafix_comp_filtered.fits', cat_neg[good], header = cat_neghd)
+    fits.writeto('XG_170-231MHz_psf_comp_negative_dafix_comp_filtered.fits', cat_neg[good_neg], header = cat_neghd)
 
 # Negative sources that are removed by the mandatory filter
 if not os.path.exists("XG_170-231MHz_psf_comp_negative_dafix_comp_removed.fits"):
-    fits.writeto('XG_170-231MHz_psf_comp_negative_dafix_comp_removed.fits', cat_neg[good], header = cat_neghd)
+    fits.writeto('XG_170-231MHz_psf_comp_negative_dafix_comp_removed.fits', cat_neg[bad_neg], header = cat_neghd)
 
 
-with open('Filtered_Cat_GOOD_IDS.dat', 'w') as outf1:
 with open('Filtered_Cat_GOOD_IDS.dat', 'w') as outf1:
     for gpi in good_pos:
        print(good_pos, file=outf1)
@@ -200,7 +211,7 @@ with open('Filtered_Cat_GOOD_IDS.dat', 'w') as outf1:
 fig = plt.figure(figsize = (8*cm, 8*cm))
 ax = fig.add_subplot(111)
 hxy = ax.hist(cat_neg['int_flux']/cat_neg['local_rms'], bins = 30, alpha = .5, color = 'blue', label = 'No Filtering')
-hxy2 = ax.hist(cat_neg['int_flux'][good]/cat_neg['local_rms'][good], bins = hxy[1], alpha = 0.8, color = 'r', label = 'Filtered')
+hxy2 = ax.hist(cat_neg['int_flux'][good_neg]/cat_neg['local_rms'][good_neg], bins = hxy[1], alpha = 0.8, color = 'r', label = 'Filtered')
 plt.axis([-10, -4, 0., 70.])
 ax.legend(loc = 2)#, prop = {'size':13})
 
@@ -209,35 +220,47 @@ ax.set_xlabel('Signal to Noise Ratio')
 fig.tight_layout()
 fig.savefig('GLEAMX_neg.png')
 
-hsnrfull = np.histogram(cat_full['peak_flux'][good_pos]/cat_full['local_rms'][good_pos], bins = np.linspace(5, 8, 10))
-hsnrneg = np.histogram((cat_neg['peak_flux'][good]*-1)/cat_neg['local_rms'][good], bins = np.linspace(5, 8, 10))
-hsnrhx = (hsnrneg[1][1:]+hsnrneg[1][:-1])/2
+#hsnrfull = np.histogram(cat_full['peak_flux'][good_pos]/cat_full['local_rms'][good_pos], bins = np.linspace(5, 8, 10))
+#hsnrneg = np.histogram((cat_neg['peak_flux'][good_neg]*-1)/cat_neg['local_rms'][good_neg], bins = np.linspace(5, 8, 10))
+#hsnrhx = (hsnrneg[1][1:]+hsnrneg[1][:-1])/2
 
-fig = plt.figure(figsize = (8*cm, 8*cm))
-ax = fig.add_subplot(111)
-ax.plot(hsnrhx, (hsnrneg[0]/hsnrfull[0].astype('float64'))*100, 'r-')
-ax.set_ylabel('% of Fake Sources')
-ax.set_xlabel('ABS(Peak SNR)')
-fig.tight_layout()
-fig.savefig('GLEAMX_neg-ratio.png')
+#fig = plt.figure(figsize = (8*cm, 8*cm))
+#ax = fig.add_subplot(111)
+#ax.plot(hsnrhx, (hsnrneg[0]/hsnrfull[0].astype('float64'))*100, 'r-')
+#ax.set_ylabel('% of Fake Sources')
+#ax.set_xlabel('ABS(Peak SNR)')
+#fig.tight_layout()
+#fig.savefig('GLEAMX_neg-ratio.png')
 
 bin_edge = np.linspace(5, 8, 10)
 bin_cen = (bin_edge[:-1] + bin_edge[1:]) / 2
 
-no_filt_hsnrfull = np.histogram(cat_full['int_flux']/cat_full['local_rms'], bins = bin_edge)
-no_filt_hsnrneg = np.histogram((cat_neg['int_flux']*-1)/cat_neg['local_rms'], bins = bin_edge)
+# Don't need these -- we ALWAYS do the filter on the bad sources near bright sources
+#no_filt_hsnrfull = np.histogram(cat_full['int_flux']/cat_full['local_rms'], bins = bin_edge)
+#no_filt_hsnrneg = np.histogram((cat_neg['int_flux']*-1)/cat_neg['local_rms'], bins = bin_edge)
 
-hsnrfull = np.histogram(cat_full['int_flux'][og_good_pos]/cat_full['local_rms'][og_good_pos], bins = bin_edge)
-hsnrneg = np.histogram((cat_neg['int_flux'][og_good]*-1)/cat_neg['local_rms'][og_good], bins = bin_edge)
-hsnrhx = (hsnrneg[1][1:]+hsnrneg[1][:-1])/2
+# This is a bit random -- this is the filter ONLY removing the negative sources right next to positive sources, not very useful by itself
+# And then also removing the positive sources nearby -- no, this is OTT, we agreed on that.
+#hsnrfull = np.histogram(cat_full['int_flux'][og_good_pos]/cat_full['local_rms'][og_good_pos], bins = bin_edge)
+#hsnrneg = np.histogram((cat_neg['int_flux'][og_good_neg]*-1)/cat_neg['local_rms'][og_good_neg], bins = bin_edge)
+#hsnrhx = (hsnrneg[1][1:]+hsnrneg[1][:-1])/2
 
+# What we actually want:
+# Just filtering the spurious components near bright sources:
+# For positive sources, that's the only filter we ever apply:
+hsnr_pos_single = np.histogram(cat_full['int_flux'][good_pos]/cat_full['local_rms'][good_pos], bins = bin_edge)
+# For negative sources, we can apply that filter:
+hsnr_neg_single = np.histogram(cat_neg['int_flux'][good_neg]*-1/cat_neg['local_rms'][good_neg], bins = bin_edge)
+# and also the filter of removing the ones that lie near other sources
+hsnr_neg_double = np.histogram(cat_neg['int_flux'][comb_good_neg]*-1/cat_neg['local_rms'][comb_good_neg], bins = bin_edge)
 
+# This just calcuates the bin centers for easy plotting
+hsnrhx = (hsnr_neg_single[1][1:]+hsnr_neg_single[1][:-1])/2
 
 fig = plt.figure(figsize = (8*cm, 8*cm))
 ax = fig.add_subplot(111)
-#ax.plot(hsnrhx, (hsnrneg[0]/hsnrfull[0].astype('float64'))*100, 'r-')
-ax.plot(hsnrhx, 100*(1-(hsnrneg[0]/hsnrfull[0].astype('float64'))), 'r-', label='Filtered')
-ax.plot(hsnrhx, 100*(1-(no_filt_hsnrneg[0]/no_filt_hsnrfull[0].astype('float64'))), 'b-', label='Not Filtered')
+ax.plot(hsnrhx, 100*(1-(hsnr_neg_double[0]/hsnr_pos_single[0].astype('float64'))), 'r-', label='Both filters')
+ax.plot(hsnrhx, 100*(1-(hsnr_neg_single[0]/hsnr_pos_single[0].astype('float64'))), 'b-', label='Single filter')
 ax.set_ylabel('Reliability / \%')
 ax.set_xlabel('Signal-to-noise ($S_\mathrm{int} / \sigma$)')
 ax.legend(loc='lower right')
