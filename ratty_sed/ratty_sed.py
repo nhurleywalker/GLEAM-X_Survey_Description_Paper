@@ -24,6 +24,7 @@ from astropy.wcs.utils import proj_plane_pixel_scales
 from astropy.stats.circstats import circmean
 from astropy.nddata import Cutout2D
 from astropy.io import fits
+from astropy.visualization import AsinhStretch, simple_norm
 
 warnings.simplefilter('ignore', category=AstropyWarning)
 
@@ -59,8 +60,8 @@ class CoordStr:
         _format = None if tex is False else 'latex'
         
         return (f'GLEAM-X '\
-                f'J{self.pos.ra.to_string(unit=u.hourangle, sep="", precision=2, pad=True, format=_format)}' \
-                f'{self.pos.dec.to_string(sep="", precision=2, alwayssign=True, pad=True, format=_format)}')
+                f'J{self.pos.ra.to_string(unit=u.hourangle, sep="", precision=1, pad=True, format=_format)}' \
+                f'{self.pos.dec.to_string(sep="", precision=0, alwayssign=True, pad=True, format=_format)}')
 
     def __str__(self):
         return self._make_str()
@@ -191,10 +192,10 @@ def plot_img_sed(idx, isl_df, img_deep_path, img_low_path, sep, deep_psf, low_ps
     ax = fig.add_axes(loc3)
 
 
+    norm = simple_norm(cutout.data, 'asinh')
     img_ax.imshow(
         cutout.data,
-        vmin=-0.001,
-        vmax=0.25,
+        norm=norm,
         # vmax=0.95*np.sum(isl_df['int_flux']),
         transform=img_ax.get_transform(cutout.wcs),
         aspect='auto'
@@ -225,10 +226,10 @@ def plot_img_sed(idx, isl_df, img_deep_path, img_low_path, sep, deep_psf, low_ps
     )
 
 
+    norm = simple_norm(cutout_low.data, 'asinh')
     img_low_ax.imshow(
         cutout_low.data,
-        vmin=-0.01,
-        vmax=0.95,
+        norm=norm,
         # vmax=0.95*np.sum(isl_df['int_flux_W_072_103MHz']),
         transform=img_low_ax.get_transform(cutout_low.wcs),
         aspect='auto'
@@ -318,7 +319,7 @@ def plot_img_sed(idx, isl_df, img_deep_path, img_low_path, sep, deep_psf, low_ps
     ax.loglog()
     ax.set(
         xlabel='Frequency (MHz)',
-        ylabel='Integrated Flux (Jy)'
+        ylabel='Flux Density (Jy)'
     )
     ax.grid(
         which='both',
