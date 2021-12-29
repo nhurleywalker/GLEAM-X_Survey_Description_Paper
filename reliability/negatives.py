@@ -113,6 +113,8 @@ og_criteria2=sep_close<=2
 good_neg = np.argwhere((criteria1 | criteria2) == False)[:,0]
 og_good_neg = np.argwhere((og_criteria1 | og_criteria2) == False)[:,0]
 comb_good_neg = np.argwhere((criteria1 | criteria2 | og_criteria1 | og_criteria2) == False)[:,0]
+# This doesn't give the correct subset of sources for some reason
+comb_bad_neg = np.argwhere((criteria1 | criteria2 | og_criteria1 | og_criteria2) == True)[:,0]
 
 ## DO SAME MATCHING AND FILTERING FOR POSTIVE CATALOGUE
 search_pos = coords_pos.search_around_sky(coords_pos, 15*u.arcmin)
@@ -200,6 +202,14 @@ if not os.path.exists("XG_170-231MHz_psf_comp_negative_dafix_comp_filtered.fits"
 # Negative sources that are removed by the mandatory filter
 if not os.path.exists("XG_170-231MHz_psf_comp_negative_dafix_comp_removed.fits"):
     fits.writeto('XG_170-231MHz_psf_comp_negative_dafix_comp_removed.fits', cat_neg[bad_neg], header = cat_neghd)
+
+# Negative sources that are removed by both filters combined
+if not os.path.exists("XG_170-231MHz_psf_comp_negative_dafix_comp_removed_by_both_filters.fits"):
+    fits.writeto('XG_170-231MHz_psf_comp_negative_dafix_comp_removed_by_both_filters.fits', cat_neg[comb_bad_neg], header = cat_neghd)
+
+# Negative sources that remain after both filters combined
+if not os.path.exists("XG_170-231MHz_psf_comp_negative_dafix_comp_filtered_by_both_filters.fits"):
+    fits.writeto('XG_170-231MHz_psf_comp_negative_dafix_comp_filtered_by_both_filters.fits', cat_neg[comb_good_neg], header = cat_neghd)
 
 
 with open('Filtered_Cat_GOOD_IDS.dat', 'w') as outf1:
