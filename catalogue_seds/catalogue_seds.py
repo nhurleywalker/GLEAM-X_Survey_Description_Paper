@@ -302,11 +302,12 @@ def process_catalogue(tab_path, output=None, plot=False, cpus=1, chunksize=16):
         # Clean up 1e+20 fill values from_pandas() brings in
         cols = [c for c in tab.columns if 'pl_' in c]
         for c in cols:
-            logger.info(f"Cleaning column {c}, {np.max(tab[c])}, {np.sum(tab[c] == 1e20)}")
-            tab[c][tab[c] == 1e20] = np.nan
+            logger.info(f"Cleaning column {c}, {np.max(tab[c])}, {np.sum(tab[c].mask)}")
+            tab[c][tab[c].mask] = np.nan
+
 
         logger.info(f"Writing to {output}")
-        tab.write(output, overwrite=True)
+        tab.write(output, overwrite=True, format='fits')
 
 
 if __name__ == '__main__':
