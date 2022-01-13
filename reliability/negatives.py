@@ -36,7 +36,8 @@ cm = 1/2.54
 def main(cat_neg_path, cat_pos_path, pos_ra_col='ra', pos_dec_col='dec', output_positive=None):
 
     print(f"Opening {cat_neg_path}")
-    cat_neg = fits.getdata(cat_neg_path) #'XG_170-231MHz_psf_comp_negative_dafix_comp.fits'
+    cat_neg = fits.getdata(cat_neg_path, 1) #'XG_170-231MHz_psf_comp_negative_dafix_comp.fits'
+    cat_neghd = fits.getheader(cat_neg_path, 1) #'XG_170-231MHz_psf_comp_negative_dafix_comp.fits'
 
 
     # cat_full = fits.getdata('XG_170-231MHz_comp_rescaled.fits', 1)
@@ -51,7 +52,7 @@ def main(cat_neg_path, cat_pos_path, pos_ra_col='ra', pos_dec_col='dec', output_
     ra_col = pos_ra_col
     dec_col = pos_dec_col
 
-    print(f"Loaded full catalogue is {len(cat_full)}")
+    print(f"Loaded positive catalogue is {len(cat_full)}")
 
     # Don't download the enormous mosaic just to get the bmaj and bmin; hardcoding them here
 
@@ -61,43 +62,33 @@ def main(cat_neg_path, cat_pos_path, pos_ra_col='ra', pos_dec_col='dec', output_
     bmaj = 2.07931250334E-02
     bmin = 1.63785628974E-02
 
-    print(f"bmaj: {bmaj}")
-    print(f"bmin: {bmin}")
-
     nsamps = ((((13.-4.)*15*np.cos(np.radians(-26.7)))*12)/(bmaj*bmin*1.13))*2.
-    print(f"nsamps: {nsamps}")
 
     ## FIND THOSE WITHIN THE CENTRAL REGION
     ##USING MIN RA OF 60 AND MAX 195 AND MIN DEC -32.7 MAX DEC -20.7
     keepneg = (cat_neg['ra']>= 60)&(cat_neg['ra']<= 195)&(cat_neg['dec']>= -32.7)&(cat_neg['dec']<= -20.7)
     keeppos = (cat_full[ra_col]>= 60)&(cat_full[ra_col]<= 195)&(cat_full[dec_col]>= -32.7)&(cat_full[dec_col]<= -20.7)
 
-
     cat_neg = cat_neg[keepneg]
     cat_full = cat_full[keeppos]
-
-    print(f"Length of full catalogue: {len(cat_full)}")
 
     #CUT OUT ONES BELOW SNR OF 5
     cat_neg = cat_neg[abs(cat_neg['int_flux']/cat_neg['local_rms'])>= 5]
     cat_full = cat_full[abs(cat_full['int_flux']/cat_full['local_rms'])>= 5]
 
-    print(f"Length of full catalogue: {len(cat_full)}")
+    print(f"Length of full catalogue, spatial clips: {len(cat_full)}")
 
     nneg = cat_neg.shape[0]
     npos = cat_full.shape[0]
 
     noise1 = np.median( cat_full['local_rms'])
 
-
     ## MAKE A REGION FILE FOR INSPECTION ##
-    print(f"Creating negatives.reg")
     with open('negatives.reg', 'w') as outf1:
         outf1.write("fk5\n")
         for i in range(cat_neg.size):
             outf1.write(f"point({cat_neg['ra'][i]},{cat_neg['dec'][i]}) # point = cross color = blue\n")
 
-    print("Creating positives.reg")
     with open('positives.reg', 'w') as outf1:
         outf1.write("fk5\n")
         for i in range(cat_full.size):
@@ -128,8 +119,6 @@ def main(cat_neg_path, cat_pos_path, pos_ra_col='ra', pos_dec_col='dec', output_
     closeid = closeid.astype(int)
     peak_flux_bright = cat_full['peak_flux'][brightid]
     drange = abs(peak_flux_bright/cat_neg['peak_flux'])
-
-    print("Setting criteria")
 
     ## SET CRITERIA 
     criteria1 = (sep_bright<= 5)&(drange>= 350)&(peak_flux_bright>= 2.)
@@ -179,7 +168,7 @@ def main(cat_neg_path, cat_pos_path, pos_ra_col='ra', pos_dec_col='dec', output_
     # Positive sources that remain after the mandatory filter
     good_pos = np.argwhere((criteria1_pos | criteria2_pos) == False )[:,0]
 
-    print(f"length of final good_pos: {len(good_pos)}")
+    print(f"length of positive catalogue, mandatory filter: {len(good_pos)}")
 
     # import sys 
     # sys.exit(1)
@@ -195,28 +184,24 @@ def main(cat_neg_path, cat_pos_path, pos_ra_col='ra', pos_dec_col='dec', output_
 
     # Region files
     # Positive sources that remain after the mandatory filter
-    print('Creating positives_not_near_bright.reg')
     with open('positives_not_near_bright.reg', 'w') as outf1:
         outf1.write("fk5\n")
         for i in range(good_pos.size):
             outf1.write(f"point({cat_full[ra_col][good_pos][i]},{cat_full[dec_col][good_pos][i]}) # point = X color = green\n")
 
     # Positive sources that are removed by the mandatory filter
-    print('Creating positives_near_bright.reg')
     with open('positives_near_bright.reg', 'w') as outf1:
         outf1.write("fk5\n")
         for i in range(bad_pos.size):
             outf1.write(f"point({cat_full[ra_col][bad_pos][i]},{cat_full[dec_col][bad_pos][i]}) # point = cross color = red\n")
 
     # Negative sources that remain after the mandatory filter
-    print('Creating negatives_not_near_bright.reg')
     with open('negatives_not_near_bright.reg', 'w') as outf1:
         outf1.write("fk5\n")
         for i in range(good_neg.size):
             outf1.write(f"point({cat_neg['ra'][good_neg][i]},{cat_neg['dec'][good_neg][i]}) # point = X color = magenta\n")
 
     # Negative sources that are removed by the mandatory filter
-    print('Creating negatives_near_bright.reg')
     with open('negatives_near_bright.reg', 'w') as outf1:
         outf1.write("fk5\n")
         for i in range(bad_neg.size):
@@ -225,12 +210,10 @@ def main(cat_neg_path, cat_pos_path, pos_ra_col='ra', pos_dec_col='dec', output_
     # # Save these as FITS tables as well so we can load them into other code
 
     if output_positive is not None:
-        print(output_positive[-5:])
         assert output_positive[-5:] == '.fits', "Ensure output name has a fits extension. "
         print(f'Creating filtered positive catalogue {output_positive}')
         fits.writeto(output_positive, cat_full[good_pos], header = cat_fullhd)
-        print(f"Good positive components: {len(good_pos)}")
-
+        
     # Positive sources that remain after the mandatory filter
     if not os.path.exists(f"XG_170-231MHz_comp_rescaled_filtered.fits"):
         fits.writeto('XG_170-231MHz_comp_rescaled_filtered.fits', cat_full[good_pos], header = cat_fullhd)
