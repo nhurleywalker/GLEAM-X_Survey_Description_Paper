@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.cm as cmap
 from matplotlib.ticker import FuncFormatter
+from matplotlib.ticker import FormatStrFormatter
 from astropy.io import fits
 from astropy.coordinates import SkyCoord
 from astropy import units as u
@@ -45,8 +46,53 @@ sep_constraint = d2d <= max_sep
 gxm = gx[sep_constraint]
 glm = gl[idx[sep_constraint]]
 
+makeSr = True
+# Plot the ratio of GLEAM to GLEAM-X 200MHz wideband detection flux densities as a function of S/N
+# Overplot the curve of the ratio of sigma based on Stefan's deconvolution tests
+if makeSr is True:
+    noise_ratios = [4, 8, 16]
+    snapshot_sigmas = [3, 5, 10, 20, 1000]
+    snapshot_ratios = []
+    for s in snapshot_sigmas:
+        csv = np.loadtxt(f"../flux_density_recovery/{s}sigma_multi_r0.5.csv", delimiter=",", comments="#", usecols=(5,8), skiprows=2, max_rows=1)
+        snapshot_ratios.append(csv[1]/csv[0])
+        print(f"../flux_density_recovery/{s}sigma_multi_r0.5.csv")
+        print(s, csv[1], csv[0], csv[1]/csv[0])
+    # Convert to arrays to avoid issues later
+    snapshot_ratios = 1.05*np.array(snapshot_ratios, dtype="float32")
+# Scale the signal-to-noise by the ratio of the snapshots to the mosaic noise
+# Typical snapshot RMS at 170--200MHz is 4.5mJy/beam
+# Typical mosaic RMS in source-finding image (where we care) is 1.2 mJy/beam
+    xmin = 12
+    xmax = 1.e4
+    ymin = 0.3
+    ymax = 2.1
+    fig = plt.figure(figsize=(8*cm,8*cm))
+    ax = fig.add_axes([0.2,0.2,0.79,0.79])
+    #ax.set_ylabel("$\frac{S_\mathrm{200MHz,fitted,GLEAM}}{S_\mathrm{200MHz,fitted,GLEAM-X}}$")
+    ax.set_ylabel(r"$\frac{S_\mathrm{200MHz,fitted,GLEAM-X}}{S_\mathrm{200MHz,fitted,GLEAM}}$")
+    ax.set_xlabel(r"$\frac{S_\mathrm{200MHz,fitted,GLEAM-X}}{\sigma_\mathrm{200MHz,local,GLEAM-X}}$")
+#    ax.set_xscale("log")
+#    ax.set_yscale("log")
+    ax.set_xlim([xmin, xmax])
+    ax.set_ylim([ymin, ymax])
+    y = gxm["sp_norm"]/glm["int_flux_fit_200"]
+    x = gxm["sp_norm"]/gxm["local_rms"]
+    #ax.scatter(x, y, zorder = 1, color="k", marker=".", alpha=0.5)#, ls="-")
+    ax.hexbin(x, y, xscale="log", yscale="log", bins="log", zorder = 1, lw=0.2, cmap="binary")#, color="k", marker=".", alpha=0.5)#, ls="-")
+    for n in noise_ratios:
+        #noise_ratio = (4.5/1.2)
+        noise_ratio = n
+        mosaic_sigmas = noise_ratio*np.array(snapshot_sigmas, dtype="float32")
+        ax.plot(mosaic_sigmas, snapshot_ratios, zorder=20, ls="-", lw=1, label=f"{n}")
+    ax.axhline(1.0, color="k", lw=0.5, ls="--")
+    ax.axvline(3*noise_ratio, color="k", lw=0.5, ls="--")
+    ax.yaxis.set_major_formatter(FormatStrFormatter('%3.0f'))
+    ax.yaxis.set_minor_formatter(FormatStrFormatter('%3.1f'))
+    ax.legend()
+    fig.savefig("test.png",bbox_inches="tight",dpi=1000)
 
-makeS = True
+makeS = False
 # It takes four minutes to generate this plot because of the error bar loop, so make it optional
 if makeS is True:
     xmin = 0.02
@@ -86,7 +132,7 @@ if makeS is True:
 
     fig.savefig("GLEAM-X_GLEAM_S200_comparison.pdf", bbox_inches="tight")
 
-makeAlpha = True
+makeAlpha = False
 if makeAlpha is True:
     xmin = -2.5
     xmax = 2.5
