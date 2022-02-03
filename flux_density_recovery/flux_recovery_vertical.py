@@ -4,6 +4,8 @@
 # for r in r0.0 r0.5 r2.0 r1.0 uniform natural; do cd multi_${r}; s=20; ~/Dropbox/scripts/flux_recovery.py 154 1202216384_zero_SNR${s} $(seq 60 20 600) --radius-unit 3600 --snr $s --sigma 0.0 -A 2.0 -a --plot --name multi-${r}-SNR${s} --recovery --model 1202216384_zero_SNR${s}_models.txt ; cd .. ; done
 ####
 
+import sys
+
 from re import M
 import numpy as np
 from argparse import ArgumentParser
@@ -16,6 +18,8 @@ import matplotlib.ticker as ticker
 from matplotlib.lines import Line2D
 
 from matplotlib import rc
+
+channel = sys.argv[1]
 
 cmap = "viridis"
 
@@ -36,35 +40,35 @@ WEIGHTS = ["uniform", "r0.0", "r0.5", "r1.0", "natural"]
 
 me = ""  # legacy
 
-d = "./20sigma_"
+d = "c{}/20sigma_".format(channel)
 
 files_multi = [d + me + "multi_{}.csv".format(i) for i in WEIGHTS]
 data_multi1 = [np.genfromtxt(f, delimiter=",", names="radius,flux,eflux,peak,rms,model,modelpeak,arcmin,aegean") for f in files_multi]
 files_multi = [d + me + "nomulti_{}.csv".format(i) for i in WEIGHTS]
 data_nomulti1 = [np.genfromtxt(f, delimiter=",", names="radius,flux,eflux,peak,rms,model,modelpeak,arcmin,aegean") for f in files_multi]
 
-d = "./1000sigma_"
+d = "c{}/1000sigma_".format(channel)
 files_multi = [d + me +  "multi_{}.csv".format(i) for i in WEIGHTS]
 data_multi2 = [np.genfromtxt(f, delimiter=",", names="radius,flux,eflux,peak,rms,model,modelpeak,arcmin,aegean") for f in files_multi]
 files_multi = [d + me +  "nomulti_{}.csv".format(i) for i in WEIGHTS]
 data_nomulti2 = [np.genfromtxt(f, delimiter=",", names="radius,flux,eflux,peak,rms,model,modelpeak,arcmin,aegean") for f in files_multi]
 
 
-d = "./10sigma_"
+d = "c{}/10sigma_".format(channel)
 files_multi = [d + me +  "multi_{}.csv".format(i) for i in WEIGHTS]
 data_multi3 = [np.genfromtxt(f, delimiter=",", names="radius,flux,eflux,peak,rms,model,modelpeak,arcmin,aegean") for f in files_multi]
 files_multi = [d + me +  "nomulti_{}.csv".format(i) for i in WEIGHTS]
 data_nomulti3 = [np.genfromtxt(f, delimiter=",", names="radius,flux,eflux,peak,rms,model,modelpeak,arcmin,aegean") for f in files_multi]
 
 
-d = "./5sigma_"
+d = "c{}/5sigma_".format(channel)
 files_multi = [d + me +  "multi_{}.csv".format(i) for i in WEIGHTS]
 data_multi4 = [np.genfromtxt(f, delimiter=",", names="radius,flux,eflux,peak,rms,model,modelpeak,arcmin,aegean") for f in files_multi]
 files_multi = [d + me +  "nomulti_{}.csv".format(i) for i in WEIGHTS]
 data_nomulti4 = [np.genfromtxt(f, delimiter=",", names="radius,flux,eflux,peak,rms,model,modelpeak,arcmin,aegean") for f in files_multi]
 
 
-d = "./3sigma_"
+d = "c{}/3sigma_".format(channel)
 files_multi = [d + me +  "multi_{}.csv".format(i) for i in WEIGHTS]
 data_multi5 = [np.genfromtxt(f, delimiter=",", names="radius,flux,eflux,peak,rms,model,modelpeak,arcmin,aegean") for f in files_multi]
 files_multi = [d + me +  "nomulti_{}.csv".format(i) for i in WEIGHTS]
@@ -180,7 +184,7 @@ for i in range(len(all_axes)):
                      transform=all_axes[i].transAxes)
 
 
-fig.savefig("flux_recovery_3-5-10-20-1000_vertical.pdf".format(me), 
+fig.savefig("flux_recovery_3-5-10-20-1000_vertical_c{}.pdf".format(channel), 
     transparent=True, 
     dpi=300, 
     bbox_inches="tight")
