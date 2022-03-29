@@ -14,6 +14,9 @@ cm = 1/2.54
 def S(nu, nu0, S0, alpha):
    return S0 * (nu/nu0)**alpha
 
+def trueS(S0, q, r):
+   return S0 * (0.5 + 0.5*np.sqrt(1 - ((4*q + 4) / (r**2))))
+
 plt.rcParams.update({
     "text.usetex": True,
     "font.family": "serif",
@@ -49,17 +52,19 @@ glm = gl[idx[sep_constraint]]
 makeSr = True
 # Plot the ratio of GLEAM to GLEAM-X 200MHz wideband detection flux densities as a function of S/N
 # Overplot the curve of the ratio of sigma based on Stefan's deconvolution tests
+# Overplot the GLEAM completeness curve
 if makeSr is True:
-    noise_ratios = [4, 8, 16]
-    snapshot_sigmas = [3, 5, 10, 20, 1000]
-    snapshot_ratios = []
-    for s in snapshot_sigmas:
-        csv = np.loadtxt(f"../flux_density_recovery/{s}sigma_multi_r0.5.csv", delimiter=",", comments="#", usecols=(5,8), skiprows=2, max_rows=1)
-        snapshot_ratios.append(csv[1]/csv[0])
-        print(f"../flux_density_recovery/{s}sigma_multi_r0.5.csv")
-        print(s, csv[1], csv[0], csv[1]/csv[0])
+#    data_gleam = np.genfromtxt("../Completeness/GLEAM_completeness.txt", usecols=[0, 4, 5]).T
+#    noise_ratios = [4, 8, 16]
+#    snapshot_sigmas = [3, 5, 10, 20, 1000]
+#    snapshot_ratios = []
+#    for s in snapshot_sigmas:
+#        csv = np.loadtxt(f"../flux_density_recovery/c169/{s}sigma_multi_r0.5.csv", delimiter=",", comments="#", usecols=(5,8), skiprows=2, max_rows=1)
+#        snapshot_ratios.append(csv[1]/csv[0])
+#        print(f"../flux_density_recovery/c169/{s}sigma_multi_r0.5.csv")
+#        print(s, csv[1], csv[0], csv[1]/csv[0])
     # Convert to arrays to avoid issues later
-    snapshot_ratios = 1.05*np.array(snapshot_ratios, dtype="float32")
+#    snapshot_ratios = np.array(snapshot_ratios, dtype="float32")
 # Scale the signal-to-noise by the ratio of the snapshots to the mosaic noise
 # Typical snapshot RMS at 170--200MHz is 4.5mJy/beam
 # Typical mosaic RMS in source-finding image (where we care) is 1.2 mJy/beam
@@ -67,30 +72,60 @@ if makeSr is True:
     xmax = 1.e4
     ymin = 0.3
     ymax = 2.1
+    ratio_error = np.sqrt((glm["err_int_flux_wide"]/glm["int_flux_wide"])**2 + (gxm["err_int_flux"]/gxm["int_flux"])**2)
+
     fig = plt.figure(figsize=(8*cm,8*cm))
     ax = fig.add_axes([0.2,0.2,0.79,0.79])
+
     #ax.set_ylabel("$\frac{S_\mathrm{200MHz,fitted,GLEAM}}{S_\mathrm{200MHz,fitted,GLEAM-X}}$")
-    ax.set_ylabel(r"$\frac{S_\mathrm{200MHz,fitted,GLEAM-X}}{S_\mathrm{200MHz,fitted,GLEAM}}$")
-    ax.set_xlabel(r"$\frac{S_\mathrm{200MHz,fitted,GLEAM-X}}{\sigma_\mathrm{200MHz,local,GLEAM-X}}$")
+    ax.set_ylabel(r"$\frac{S_\mathrm{200MHz,GLEAM-X}}{S_\mathrm{200MHz,GLEAM}}$")
+    ax.set_xlabel(r"$\frac{S_\mathrm{200MHz,GLEAM-X}}{\sigma_\mathrm{200MHz,GLEAM-X}}$")
+    #ax.set_xlabel(r"$S_\mathrm{200MHz,fitted,GLEAM-X}$")
+
+# Only plot this if the x-axis is S/N
+#    s_gleam = data_gleam[0]
+#    c_gleam = 1.05*data_gleam[1]/100
+#    cerr_gleam = data_gleam[2]/100
+#    ax.errorbar(
+#       s_gleam,
+#       c_gleam,
+#       ms=1.0,
+#       color="red",
+#       marker=',',
+#       linewidth=0.7,
+#       yerr = cerr_gleam
+#    )
+
 #    ax.set_xscale("log")
 #    ax.set_yscale("log")
     ax.set_xlim([xmin, xmax])
     ax.set_ylim([ymin, ymax])
-    y = gxm["sp_norm"]/glm["int_flux_fit_200"]
-    x = gxm["sp_norm"]/gxm["local_rms"]
+    #y = gxm["sp_norm"]/glm["int_flux_fit_200"]
+    glm_corr = trueS(glm["int_flux_wide"], 1.54, glm["int_flux_wide"]/glm["local_rms_wide"])
+#    glm_corr = trueS(glm["int_flux_151"], 1.54, glm["int_flux_151"]/glm["local_rms_151"])
+    #y = gxm["int_flux"]/glm_corr #glm["int_flux_wide"]
+    y = gxm["int_flux"]/glm_corr #glm["int_flux_wide"]
+    #y = gxm["int_flux_N_147_154MHz"]/glm_corr #glm["int_flux_wide"]
+    #x = gxm["sp_norm"]#/gxm["local_rms"]
+    x = gxm["int_flux"]/gxm["local_rms"]
+    #x = gxm["int_flux_N_147_154MHz"]#/gxm["local_rms"]
     #ax.scatter(x, y, zorder = 1, color="k", marker=".", alpha=0.5)#, ls="-")
     ax.hexbin(x, y, xscale="log", yscale="log", bins="log", zorder = 1, lw=0.2, cmap="binary")#, color="k", marker=".", alpha=0.5)#, ls="-")
-    for n in noise_ratios:
+#    ax.hexbin(x, ratio_error, xscale="log", yscale="log", bins="log", zorder = 2, lw=0.2, cmap="viridis")#, color="k", marker=".", alpha=0.5)#, ls="-")
+#    for n in noise_ratios:
         #noise_ratio = (4.5/1.2)
-        noise_ratio = n
-        mosaic_sigmas = noise_ratio*np.array(snapshot_sigmas, dtype="float32")
-        ax.plot(mosaic_sigmas, snapshot_ratios, zorder=20, ls="-", lw=1, label=f"{n}")
-    ax.axhline(1.0, color="k", lw=0.5, ls="--")
-    ax.axvline(3*noise_ratio, color="k", lw=0.5, ls="--")
+#        noise_ratio = n
+#        mosaic_sigmas = noise_ratio*np.array(snapshot_sigmas, dtype="float32")
+#        ax.plot(mosaic_sigmas, snapshot_ratios, zorder=20, ls="-", lw=1, label=f"{n}")
+    ax.axhline(1.0, color="k", lw=0.5, ls="-")
+    ax.axhline(1.05, color="k", lw=0.5, ls="--")
+#    ax.axvline(3*noise_ratio, color="k", lw=0.5, ls="--")
+#    ax.axvline(.060, color="k", lw=0.5, ls="--")
+    ax.axvline(100, color="k", lw=0.5, ls="--")
     ax.yaxis.set_major_formatter(FormatStrFormatter('%3.0f'))
     ax.yaxis.set_minor_formatter(FormatStrFormatter('%3.1f'))
-    ax.legend()
-    fig.savefig("test.png",bbox_inches="tight",dpi=1000)
+#    ax.legend()
+    fig.savefig("GLEAM-X_GLEAMcorr_nofit_ratio_hexbins.pdf",bbox_inches="tight",dpi=1000)
 
 makeS = False
 # It takes four minutes to generate this plot because of the error bar loop, so make it optional
