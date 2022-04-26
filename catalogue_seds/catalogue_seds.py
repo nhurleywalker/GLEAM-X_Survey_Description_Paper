@@ -43,8 +43,8 @@ class CoordStr:
         _format = None if tex is False else 'latex'
         
         return (f'GLEAM-X '\
-                f'J{self.pos.ra.to_string(unit=u.hourangle, sep="", precision=2, pad=True, format=_format)}' \
-                f'{self.pos.dec.to_string(sep="", precision=2, alwayssign=True, pad=True, format=_format)}')
+                f'J{self.pos.ra.to_string(unit=u.hourangle, sep="", precision=1, pad=True, format=_format)}' \
+                f'{self.pos.dec.to_string(sep="", precision=0, alwayssign=True, pad=True, format=_format)}')
 
     def __str__(self):
         return self._make_str()
@@ -262,6 +262,13 @@ def fit_models(info):
     return results
 
 
+def create_source_name(row):
+    coord_src = CoordStr(
+        SkyCoord(row.ref_ra*u.deg, row.ref_dec*u.deg)
+    )
+
+    return str(coord_src)
+
 def process_catalogue(tab_path, output=None, plot=False, cpus=1, chunksize=16):
 
     if plot is True:
@@ -283,6 +290,10 @@ def process_catalogue(tab_path, output=None, plot=False, cpus=1, chunksize=16):
     logger.info('Combining dataframes')
     comb_df = df.join(res_df)
 
+    logger.info('Creating source name')
+    comb_df['src_name'] = comb_df.apply(create_source_name, axis=1)
+
+    logger.info('Counting models')
     pl_count = np.sum(np.isfinite(comb_df.pl_rchi2))
     cpl_count = np.sum(np.isfinite(comb_df.cpl_rchi2))
     no_count = np.sum( ~np.isfinite(comb_df.pl_rchi2) & ~np.isfinite(comb_df.cpl_chi2) )

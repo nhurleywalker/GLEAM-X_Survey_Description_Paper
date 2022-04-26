@@ -9,5 +9,5 @@ python reliability/negatives.py \
 
 python catalogue_seds/catalogue_seds.py \
 	IDR1_subset_filtered.fits \
-	-o IDR1_subset_filtered_SEDs.fits
+	-c 8 -o IDR1_subset_filtered_SEDs.fits
 

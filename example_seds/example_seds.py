@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
+import astropy.units as u
+from astropy.coordinates import SkyCoord
 
 from matplotlib.ticker import FormatStrFormatter
 
@@ -24,6 +26,33 @@ markers = {
 
 ref_nu = 200
 
+class CoordStr:
+    def __init__(self, *args, **kwargs):
+        if len(args) == 1 and len(kwargs) == 0:
+            self.pos = args[0]
+        else:
+            self.pos = SkyCoord(*args, **kwargs)
+        
+        
+    def _make_str(self, tex=False):
+        _format = None if tex is False else 'latex'
+        
+        return (f'GLEAM-X '\
+                f'J{self.pos.ra.to_string(unit=u.hourangle, sep="", precision=1, pad=True, format=_format)}' \
+                f'{self.pos.dec.to_string(sep="", precision=0, alwayssign=True, pad=True, format=_format)}')
+
+    def __str__(self):
+        return self._make_str()
+    
+    def __repr__(self):
+        return str(self)
+     
+    @property
+    def tex(self):
+        return self._make_str(tex=True)
+
+
+
 def pl(nu, norm, alpha):
     return norm * nu **alpha 
 
@@ -42,9 +71,17 @@ def curved_law(nu, s_nu, alpha, q):
     return s_nu * spec_nu ** alpha * \
             np.exp(q * np.log(spec_nu)**2)
 
-def fn_to_tex(fn):
-    # because I am a bad person
-    return fn.replace('.csv','').replace('-','--')
+def fn_to_tex(fn, old=False):
+    if old:
+        # because I am a bad person
+        return fn.replace('.csv','').replace('-','--')
+    
+    print(fn)
+    print(fn[8:-4])
+    sky_coord = SkyCoord(fn[8:-4], unit=(u.hourangle, u.degree))
+    coord_str = CoordStr(sky_coord)
+
+    return coord_str.tex
 
 
 def overlay_box(ax, text, x=0.02, y=0.125):
