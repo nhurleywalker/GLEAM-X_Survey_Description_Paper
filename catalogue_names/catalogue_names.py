@@ -1,6 +1,13 @@
+#!/usr/bin/env bash
+
+"""A small helper script to select, rename and reorder columns 
+from the priorized catalogue table into a form described in the 
+GLEAM-X survey description paper. 
+"""
+
 from argparse import ArgumentParser 
 from pathlib import Path
-from typing import List
+from typing import List, Union
 import logging 
 import sys 
 
@@ -232,7 +239,7 @@ def clean_table(cata_tab: Table) -> Table:
 
     return cata_tab
 
-def apply_mapping(cata_path: str) -> None:
+def apply_mapping(cata_path: Union[str,Path]) -> None:
     """Takes the priorized catalogue table and selected the subset of columns, renames them, and 
     performs some basic cleaning up of masked values to appropriately write to a FITS table
 
@@ -279,7 +286,6 @@ if __name__ == '__main__':
     parser = ArgumentParser(description="Rename and subset columns into the final gleam-x catalogue")
 
     parser.add_argument('catalogue', type=str, help='Path to catalogue to correct')
-    parser.add_argument('-o', '--output', type=str, default='final_catalogue.fits', help='Output name of the final corrected catalogue')
     parser.add_argument('-v','--verbose', default=False, action='store_true', help='Extra logging')
     parser.add_argument('-m','--mapping', default=False, action='store_true', help='Print the column mapping that will be applied and exit')
 
