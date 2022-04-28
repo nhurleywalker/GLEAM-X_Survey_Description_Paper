@@ -22,7 +22,9 @@ logger.addHandler(logging.StreamHandler())
 # The frequency label mapping between the columns in the DR1 catalogue
 # paper and those in the priorized fitting code
 PAPER_TO_PRIOR_FREQ = {
+    # The reference 60MHz image
     'wide': 'wide',
+    # The narrow band
     '076' : '072-080',
     '084' : '080-088',
     '092' : '088-095',
@@ -42,8 +44,13 @@ PAPER_TO_PRIOR_FREQ = {
     '204' : '200-208',
     '212' : '208-216',
     '220' : '216-223',
-    '227' : '223-231'
-
+    '227' : '223-231',
+    # The 30MHz wide band
+    'W_087' : '072-103',
+    'W_118' : '103-134',
+    'W_154' : '139-170',
+    'W_185' : '170-200',
+    'W_215' : '200-231'
 }
 
 # Split them out
@@ -180,20 +187,25 @@ def priorized_catalogue_lookup(col: str) -> str:
 
     if '_' in col:
         splits = col.split('_')
-        paper_freq = splits[-1]
-        paper_prefix = '_'.join(splits[:-1])
+        
+        # Horrid hack to avoid the requested W for wideband lookup
+        split_to = -2 if splits[-2] == 'W' else -1
+        paper_freq = '_'.join(splits[split_to:])
+        paper_prefix = '_'.join(splits[:split_to])
         
         if paper_freq in PAPER_TO_PRIOR_FREQ:
             prior_freq = PAPER_TO_PRIOR_FREQ[paper_freq]
             prior_prefix = PAPER_TO_PRIOR_NAMES[paper_prefix]
-
-            if paper_freq != 'wide':
+            
+            if paper_freq in ['W_087', 'W_118', 'W_154', 'W_185', 'W_215']:
+                mapped_col = f"{prior_prefix}_W_{prior_freq.replace('-','_')}MHz"
+            elif paper_freq != 'wide':
                 mapped_col = f"{prior_prefix}_N_{prior_freq.replace('-','_')}MHz"
             else:
                 mapped_col = f"{prior_prefix}"
 
     if mapped_col is None:
-        raise ValueError(f"Mapped value for {col} does not exists")
+        raise ValueError(f"Mapped value for {col} does not exist. Current values {paper_freq=} {paper_prefix=}")
 
     return mapped_col
 
