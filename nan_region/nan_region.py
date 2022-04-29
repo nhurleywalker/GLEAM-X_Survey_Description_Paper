@@ -81,7 +81,17 @@ def save_fits_img(data: np.ndarray, hdr: dict, path: Path=Path('test.fits')) -> 
     )
 
 
-def construct_bounding_region(mask: np.ndarray, header: dict=None):
+def construct_bounding_region(mask: np.ndarray, header: dict=None) -> Tuple[slice, slice, dict]:
+    """Determine a tight bounding box around a boolean numpy array
+
+    Args:
+        mask (np.ndarray): The mask data of a region to construct a box around
+        header (dict, optional): If not None, this fits header will be updates based on the slice. Defaults to None.
+
+    Returns:
+        Tuple[slice, slice, dict]: The first- and second-dimension slice objects of the bounding box. 
+        If header is not None, this is an updated headfer. 
+    """
     assert len(mask.shape) == 2, "Only two dimensions are supported"
 
     logger.info("Finding row min")
@@ -120,6 +130,13 @@ def construct_bounding_region(mask: np.ndarray, header: dict=None):
 
 
 def nan_image(img: Path, trim: bool=False, save_mask: bool=False):
+    """Open a fits images and determine the pixels in the prime region. Create new output images and masks. 
+
+    Args:
+        img (Path): Path to fits image that should be cute
+        trim (bool, optional): If trim, a tight image will be created. Defaults to False.
+        save_mask (bool, optional): Save the masks that are constructed along side the final image. Defaults to False.
+    """
     logger.info(f"Opening {img}")
 
     with fits.open(img) as img_fits:
