@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 from argparse import ArgumentParser
-from typing import Tuple
+from typing import Tuple, Optional
 
 from tqdm import tqdm
 import numpy as np
@@ -17,7 +17,7 @@ RA_LIMITS = (60, 195)
 DEC_LIMITS = (-32.7, -20.7)
 
 def check_row(
-    img_shape: Tuple[int], 
+    img_shape: Tuple[int, ...], 
     row_count: int, 
     img_wcs: WCS, 
     ra_limits: Tuple[float, float]=RA_LIMITS,
@@ -81,7 +81,7 @@ def save_fits_img(data: np.ndarray, hdr: dict, path: Path=Path('test.fits')) -> 
     )
 
 
-def construct_bounding_region(mask: np.ndarray, header: dict=None) -> Tuple[slice, slice, dict]:
+def construct_bounding_region(mask: np.ndarray, header: dict=None) -> Tuple[slice, slice, Optional[dict]]:
     """Determine a tight bounding box around a boolean numpy array
 
     Args:
@@ -89,7 +89,7 @@ def construct_bounding_region(mask: np.ndarray, header: dict=None) -> Tuple[slic
         header (dict, optional): If not None, this fits header will be updates based on the slice. Defaults to None.
 
     Returns:
-        Tuple[slice, slice, dict]: The first- and second-dimension slice objects of the bounding box. 
+        Tuple[slice, slice, Optional[dict]]: The first- and second-dimension slice objects of the bounding box. 
         If header is not None, this is an updated headfer. 
     """
     assert len(mask.shape) == 2, "Only two dimensions are supported"
@@ -169,6 +169,9 @@ def nan_image(img: Path, trim: bool=False, save_mask: bool=False):
     logger.info("Applying trim operation")
     slices = construct_bounding_region(img_mask, header=img_hdr)
     row_slice, col_slice, hdr_slice = slices
+
+    if hdr_slice is None:
+        raise ValueError(f"Trimmed header has not been created successfully. ")
 
     save_fits_img(
         img_data[row_slice, col_slice],
