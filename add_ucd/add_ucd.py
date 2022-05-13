@@ -96,14 +96,14 @@ def add_ucds(input: Path, output: Path, apply: bool=False):
     metas['err_sp_int_flux_fit_200'] = {'ucd':'stat.error;phot.flux;em.radio.200MHz',      'units':'Jy',     'description':'Error on power-law fitted flux density at 200 MHz'}
     metas['sp_alpha']          = {'ucd':'spec.index;em.radio',                             'units':'',       'description':'Fitted spectral index assuming power-law SED'}
     metas['err_sp_alpha']      = {'ucd':'stat.error;spec.index;em.radio',                  'units':'',       'description':'Error on fitted spectral index assuming power-law SED'}
-    metas['sp_reduced_chi2']   = {'ucd':'',                                                'units':'',       'description':'Reduced chi-squared statistic for power-law SED fit'}
+    metas['sp_reduced_chi2']   = {'ucd':'stat.fit.goodness',                               'units':'',       'description':'Reduced chi-squared statistic for power-law SED fit'}
     metas['csp_int_flux_fit_200'] = {'ucd':'phot.flux;em.radio.200MHz',                    'units':'Jy',     'description':'Curved SED fitted flux density at 200 MHz'}
     metas['err_csp_int_flux_fit_200'] = {'ucd':'stat.error;phot.flux;em.radio.200MHz',     'units':'Jy',     'description':'Error on curved SED fitted flux density at 200 MHz'}
     metas['csp_alpha']         = {'ucd':'spec.index;em.radio',                             'units':'',       'description':'Fitted spectral index assuming curved SED'}
     metas['err_csp_alpha']     = {'ucd':'stat.error;spec.index;em.radio',                  'units':'',       'description':'Error on fitted spectral index assuming curved SED'}
-    metas['csp_beta']          = {'ucd':'',                                                'units':'',       'description':'Fitted curvature index assuming curved SED'}
-    metas['err_csp_beta']      = {'ucd':'',                                                'units':'',       'description':'Error on fitted curvature index assuming curved SED'}
-    metas['csp_reduced_chi2']  = {'ucd':'',                                                'units':'',       'description':'Reduced chi-squared statistic for curved SED fit'}
+    metas['csp_beta']          = {'ucd':'stat.fit',                                        'units':'',       'description':'Fitted curvature index assuming curved SED'}
+    metas['err_csp_beta']      = {'ucd':'stat.error',                                      'units':'',       'description':'Error on fitted curvature index assuming curved SED'}
+    metas['csp_reduced_chi2']  = {'ucd':'stat.fit.goodness',                               'units':'',       'description':'Reduced chi-squared statistic for curved SED fit'}
 
 
     for mid,frange  in zip(mids,freqs):

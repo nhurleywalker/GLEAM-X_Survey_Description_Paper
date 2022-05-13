@@ -85,6 +85,7 @@ def fn_to_tex(fn, old=False):
 
 
 def overlay_box(ax, text, x=0.02, y=0.125):
+    print(text)
     ax.text(
         x, 
         y,
