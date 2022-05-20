@@ -241,13 +241,32 @@ def clean_table(cata_tab: Table) -> Table:
     Returns:
         astropy.table.Table: The fixed table that will not insert 1e20 values when written out as fits. 
     """
+    logger.info(f"Table Columns: {cata_tab.columns=}")
+    logger.info(f"Table Columns: {len(cata_tab.columns)=}")
+
     for c in cata_tab.columns:
         try:
             logger.info(f"Cleaning column {c}, {np.sum(cata_tab[c].mask)} nans to fill")
-            cata_tab[c][cata_tab[c].mask] = np.nan
+            cata_tab[c][cata_tab[c].data.mask] = np.nan
         except Exception as e:
             logger.debug(f"Error cleaning {c} - {e}")
             pass
+
+    for c in ('err_RAJ2000', 'err_DEJ2000', 'err_peak_flux_wide', 'err_a_wide', 'err_b_wide', 'residual_mean_wide','residual_std_wide'):
+        logger.info(f"Column {c=} {cata_tab[c].dtype=}")
+        try:
+            # This 1e20 is a magic astropy Table fill value for nan / non-finite numbers
+            max_mask = np.isclose(cata_tab[c], 1e20)
+            if np.any(max_mask):
+                # Using -1, as errors on these quantities are aegean issues quantifying the unceraintity on the wide band
+                # It appears the sub-band quantities are OK
+                cata_tab[c][max_mask] = -1 
+
+                logger.info(f"Detected astropy table {np.sum(max_mask)} fill values in {c}, reseting to nan")
+            else:
+                logger.info(f"Confused Tim, {np.max(cata_tab[c])}")
+        except TypeError as err:
+            logger.debug(f"TypeError reported for {c}")
 
     return cata_tab
 
@@ -288,10 +307,18 @@ def apply_mapping(cata_path: Union[str,Path]) -> None:
     # now clean and save
     out_name = cata_path.with_name(f"{cata_path.stem}_paper.fits")
     logger.info(f"Saving to {out_name}")
+    
     paper_tab = clean_table(Table.from_pandas(sub_cata_df))
     paper_tab.write(out_name, overwrite=True)
 
 
+    # bad_col = paper_tab['err_DEJ2000']
+    # logger.debug(
+    #     f"{np.min(bad_col)=} {np.max(bad_col)=} {np.sum(np.isfinite(bad_col))} {len(bad_col)=}"
+    # )
+
+    # import ipdb
+    # ipdb.set_trace()
 
 
 if __name__ == '__main__':
