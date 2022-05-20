@@ -329,7 +329,12 @@ if __name__ == '__main__':
     parser.add_argument('-p','--plot', default=False, action='store_true', help='Make plots for SEDs with a successful fit')
     parser.add_argument('-c','--cpus', default=1, type=int, help='Number of CPUs to abuse')
     parser.add_argument('--chunksize', default=16, type=int, help='Chunksize used in the multiprocessing. Bigger numbers can be a lot faster. Be cautious of large numbers when plotting. ')
+    parser.add_argument('-v', '--verbose', action='store_true', help='More output information')
+    
     args = parser.parse_args()
+
+    if args.verbose:
+        logger.setLevel(logging.DEBUG)
 
     process_catalogue(
         args.table,
